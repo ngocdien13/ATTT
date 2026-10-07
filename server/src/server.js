@@ -1,96 +1,105 @@
-const express = require("express");
-const session = require("express-session");
-const db = require("./config/database.js");
-const { register, login } = require("./controllers/authController");
-const app = express();
-app.use(express.static("../client"));
-const PORT = 3000;
-const { getUserById } = require("./controllers/userController");
-const {
-    sendFriendRequest,
-    getIncomingFriendRequests,
-    acceptFriendRequest,
-    rejectFriendRequest,
-    getFriends
-} = require("./controllers/friendshipController");
-
-app.use(express.json());
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-    }
-}));
-app.get("/", (req, res) => {
-    res.send("Secure Chat Server is running!");
-});
-app.post("/api/auth/register", register);
-app.post("/api/auth/login", login);
-app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((error) => {
-        if (error) {
-            console.error("Logout error:", error);
-
-            return res.status(500).json({
-                message: "Logout failed"
-            });
+const path = require('path');
+const express = require('express');
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const db = require('./config/database');
+const auth = require('./middleware/auth');
+const rateLimit = require('./middleware/rateLimit');
+const debugRequests = require('./middleware/debugRequests');
+const {endpoint, errorHandler, fail, ApiError} = require('./utils/api');
+const accounts = require('./controllers/authController');
+const users = require('./controllers/userController');
+const friends = require('./controllers/friendshipController');
+const keys = require('./controllers/keyController');
+const messages = require('./controllers/messageController');
+const conversations = require('./controllers/conversationController');
+function makeSessionStore() {
+    return new MySQLStore({host: process.env.DB_HOST || 'localhost', port: Number(process.env.DB_PORT || 3306),
+        user: process.env.DB_USER || 'root', password: process.env.DB_PASSWORD || '', database: process.env.DB_NAME || 'seruchat',
+        charset: 'utf8mb4_bin', expiration: 24 * 60 * 60 * 1000});
+}
+function createApp({store} = {}) {
+    if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32 || process.env.SESSION_SECRET.startsWith('REPLACE_')) throw new Error('Set SESSION_SECRET to a random string of at least 32 characters in server/.env');
+    const app = express();
+    app.disable('x-powered-by');
+    app.use(debugRequests());
+    if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+    app.use(express.json({limit: '128kb'}));
+    app.use((req, res, next) => {
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && req.get('Origin')) {
+            try {
+                const origin = new URL(req.get('Origin'));
+                if (origin.host !== req.get('Host') || origin.protocol !== `${req.protocol}:`) fail(403, 'Cross-origin write request is not allowed');
+            } catch (error) { return next(error instanceof ApiError ? error : new ApiError(400, 'Invalid Origin header')); }
         }
-
-        res.clearCookie("connect.sid");
-
-        res.json({
-            message: "Logout successful"
-        });
+        if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body !== undefined &&
+            (!req.body || typeof req.body !== 'object' || Array.isArray(req.body))) return res.status(400).json({message: 'JSON body must be an object'});
+        req.body ??= {};
+        next();
     });
-});
-
-app.get("/api/auth/me", async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({
-            message: "Not authenticated"
-        });
-    }
+    const sessionStore = store || makeSessionStore();
+    app.locals.sessionStore = sessionStore;
+    app.use(session({secret: process.env.SESSION_SECRET, store: sessionStore, resave: false,
+        saveUninitialized: false, cookie: {httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 86400000}}));
+    const authLimit = rateLimit({limit: 15, windowMs: 60000, key: req => req.ip});
+    const friendsLimit = rateLimit({limit: 20, windowMs: 60000});
+    const sendLimit = rateLimit({limit: 30, windowMs: 10000});
+    const keyLimit = rateLimit({limit: 10, windowMs: 60000});
+    const createLimit = rateLimit({limit: 30, windowMs: 60000});
+    app.post('/api/auth/register', authLimit, endpoint(accounts.register));
+    app.post('/api/auth/login', authLimit, endpoint(accounts.login));
+    app.use('/api', auth);
+    app.get('/api/auth/me', endpoint(accounts.me));
+    app.post('/api/auth/logout', endpoint(async (req, res) => {
+        await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve()));
+        res.clearCookie('connect.sid', {httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production'});
+        res.json({message: 'Logout successful'});
+    }));
+    app.get('/api/users/:id', endpoint(users.getUserById));
+    app.post('/api/friendships/request', friendsLimit, endpoint(friends.sendFriendRequest));
+    app.get('/api/friendships/requests', endpoint(friends.getIncomingFriendRequests));
+    app.get('/api/friendships/outgoing', endpoint(friends.getOutgoingFriendRequests));
+    app.post('/api/friendships/:id/cancel', friendsLimit, endpoint(friends.cancelFriendRequest));
+    app.post('/api/friendships/:id/accept', friendsLimit, endpoint(friends.acceptFriendRequest));
+    app.post('/api/friendships/:id/reject', friendsLimit, endpoint(friends.rejectFriendRequest));
+    app.get('/api/friendships', endpoint(friends.getFriends));
+    app.post('/api/friendships/block', friendsLimit, endpoint(friends.blockUser));
+    app.post('/api/friendships/unblock', friendsLimit, endpoint(friends.unblockUser));
+    app.post('/api/friendships/remove', friendsLimit, endpoint(friends.removeFriend));
+    app.get('/api/friendships/blocked', endpoint(friends.getBlockedUsers));
+    app.post('/api/keys/public', keyLimit, endpoint(keys.savePublicKey));
+    app.get('/api/keys/public/:userId', endpoint(keys.getPublicKey));
+    app.get('/api/keys/private', endpoint(keys.getMyPrivateKey));
+    app.post('/api/conversations', createLimit, endpoint(conversations.createConversation));
+    app.get('/api/conversations', endpoint(conversations.getConversations));
+    app.post('/api/messages', sendLimit, endpoint(messages.sendMessage));
+    app.get('/api/messages/:conversationId', endpoint(messages.getMessages));
+    // Java HTTP compatibility. IDs are UUIDs; all routes use the login session.
+    app.get('/users/:id/public-key', auth, endpoint(keys.getPublicKey));
+    app.post('/users/:id/public-key', auth, keyLimit, endpoint(keys.savePublicKey));
+    app.post('/messages', auth, sendLimit, endpoint(messages.sendMessage));
+    app.get('/messages/:id', auth, endpoint(messages.getJavaInbox));
+    app.use('/api', (req, res) => res.status(404).json({message: 'API route not found'}));
+    app.use(express.static(path.resolve(__dirname, '../../client')));
+    app.use((req, res) => res.status(404).json({message: 'Route not found'}));
+    app.use(errorHandler);
+    return app;
+}
+async function start() {
+    const app = createApp(), store = app.locals.sessionStore;
     try {
-        const [users] = await db.promise().query(
-            "SELECT id, username, email FROM users WHERE id = ?",
-            [req.session.userId]
-        );
-        if (users.length === 0) {
-            return res.status(401).json({
-                message: "User not found"
-            });
-        }
-        res.json({
-            user: users[0]
+        await db.promise().query('SELECT 1');
+        await store.onReady();
+        const port = Number(process.env.PORT || 3000);
+        const server = app.listen(port, '0.0.0.0', () => {
+            console.log(`Seruchat: http://localhost:${port}`);
+            if (process.env.DEBUG_API === '1') console.log('API tracing enabled: action, route, status and duration. Automatic polling also appears here.');
         });
-    } catch (error) {
-        console.error("Get current user error:", error);
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
-});
-
-app.get("/api/users/:id", getUserById);
-app.post("/api/friendships/request", sendFriendRequest);
-app.get(
-    "/api/friendships/requests",
-    getIncomingFriendRequests
-);
-app.post(
-    "/api/friendships/:id/accept",
-    acceptFriendRequest
-);
-app.post(
-    "/api/friendships/:id/reject",
-    rejectFriendRequest
-);
-app.get("/api/friendships", getFriends);
-
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+        server.on('error', error => { console.error('Server failed:', error.message); store.close(); db.end(); process.exitCode = 1; });
+        for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => server.close(() => {
+            store.close(); db.end();
+        }));
+    } catch (error) { console.error('Startup failed:', error.message); await store.close(); await db.promise().end(); process.exitCode = 1; }
+}
+if (require.main === module) start().catch(error => { console.error(error.message); process.exitCode = 1; });
+module.exports = {createApp, start};

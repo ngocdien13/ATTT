@@ -1,260 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Secure Chat</title>
-
+    <title>Seruchat</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
-
 <main>
-
     <!-- Login -->
     <section id="loginSection">
-
         <h1>Secure Chat</h1>
-
         <form id="loginForm">
-
             <label for="loginEmail">
                 Email
             </label>
-
             <input
                     type="email"
                     id="loginEmail"
                     placeholder="Email"
                     required
             >
-
             <label for="loginPassword">
                 Password
             </label>
-
             <input
                     type="password"
                     id="loginPassword"
                     placeholder="Password"
                     required
             >
-
             <button type="submit">
                 Login
             </button>
-
         </form>
-
         <p id="loginMessage"></p>
-
         <button type="button" id="showRegister">
             Create account
         </button>
-
     </section>
-
-
     <!-- Register -->
     <section id="registerSection" hidden>
-
         <h1>Create Account</h1>
-
         <form id="registerForm">
-
             <label for="registerUsername">
                 Username
             </label>
-
             <input
                     type="text"
                     id="registerUsername"
                     placeholder="Username"
                     required
             >
-
             <label for="registerEmail">
                 Email
             </label>
-
             <input
                     type="email"
                     id="registerEmail"
                     placeholder="Email"
                     required
             >
-
             <label for="registerPassword">
                 Password
             </label>
-
             <input
                     type="password"
                     id="registerPassword"
                     placeholder="Password"
                     required
             >
-
             <label for="confirmPassword">
                 Confirm password
             </label>
-
             <input
                     type="password"
                     id="confirmPassword"
                     placeholder="Confirm password"
                     required
             >
-
             <button type="submit">
                 Create account
             </button>
-
         </form>
-
         <p id="registerMessage"></p>
-
         <button type="button" id="showLogin">
             Back to login
         </button>
-
     </section>
-
-
     <!-- User area -->
     <section id="userInfo" hidden>
-
+        <p id="keyStatus" role="status"></p>
+        <p id="operationStatus" role="status" aria-live="polite"></p>
         <header>
             <h1>Secure Chat</h1>
-
             <div>
                 <p id="username"></p>
                 <p id="userEmail"></p>
-
                 <p>
                     Your User ID:
                     <span id="currentUserId"></span>
                 </p>
-
                 <button
                         type="button"
                         id="copyUserId"
                 >
                     Copy User ID
                 </button>
-
                 <p id="copyMessage"></p>
-
                 <button
                         type="button"
                         id="logout"
                 >
                     Logout
                 </button>
-
                 <p id="logoutMessage"></p>
-
             </div>
         </header>
-
-
         <!-- Find user -->
         <section id="findUserSection">
-
-            <h2>Find User</h2>
-
+            <h2>Tìm người dùng</h2>
             <form id="findUserForm">
-
                 <label for="userId">
                     User ID
                 </label>
-
                 <input
                         type="text"
                         id="userId"
                         placeholder="Enter user ID"
                         required
                 >
-
                 <button type="submit">
                     Find User
                 </button>
-
             </form>
-
             <p id="findUserMessage"></p>
-
         </section>
-
-
         <!-- Found user -->
         <section id="foundUser" hidden>
-
             <h2>User</h2>
-
             <p>
                 Username:
                 <span id="foundUsername"></span>
             </p>
-
             <p>
                 User ID:
                 <span id="foundUserId"></span>
             </p>
-
             <button
                     type="button"
                     id="addFriend"
             >
-                Add Friend
+                Kết bạn
             </button>
-
             <p id="friendMessage"></p>
-
+            <button type="button" id="blockFoundUser">Chặn</button>
+            <p id="foundRelationship"></p>
+            <div id="foundExtraActions"></div>
         </section>
-
         <!-- Friend requests -->
         <section id="friendRequestsSection">
-
-            <h2>Friend Requests</h2>
-
+            <h2>Lời mời nhận được</h2>
             <div id="friendRequests">
                 <!-- Friend requests will be inserted here -->
             </div>
-
         </section>
-
-
+        <section id="outgoingRequestsSection"><h2>Lời mời đã gửi</h2><div id="outgoingRequests"></div></section>
         <!-- Friends -->
         <section id="friendsSection">
-
-            <h2>Friends</h2>
-
+            <h2>Bạn bè</h2>
             <div id="friendsList">
                 <!-- Friends will be inserted here -->
             </div>
-
         </section>
-
-
         <!-- Conversations -->
+        <section id="blockedUsersSection"><h2>Người đã chặn</h2><div id="blockedUsers"></div></section>
         <section id="conversationsSection">
-
-            <h2>Conversations</h2>
-
+            <h2>Cuộc trò chuyện</h2>
             <div id="conversationsList">
                 <!-- Conversations will be inserted here -->
             </div>
-
         </section>
-
+        <section id="chatSection" hidden>
+            <h2>Chat</h2>
+            <p id="chatUser"></p>
+            <p id="chatRelationship" role="status"></p>
+            <div id="chatActions"></div>
+            <div id="messagesList">
+                <!-- Messages will be inserted here -->
+            </div>
+            <form id="messageForm">
+                <textarea id="messageInput" rows="2" placeholder="Nhập tin nhắn. Ctrl + Enter để gửi." aria-label="Tin nhắn" required></textarea>
+                <button type="submit" id="sendMessageButton">
+                    Send
+                </button>
+            </form>
+            <p id="messageStatus"></p>
+        </section>
     </section>
-
 </main>
-
+<dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription">
+    <form method="dialog">
+        <h2 id="confirmTitle"></h2>
+        <p id="confirmDescription"></p>
+        <div class="confirm-actions">
+            <button id="confirmNo" value="no" autofocus>No</button>
+            <button id="confirmYes" value="yes">Yes</button>
+        </div>
+    </form>
+</dialog>
+<script src="/js/encryption/keyManager.js"></script>
+<script src="/js/encryption/encryption.js"></script>
+<script src="/js/encryption/decryption.js"></script>
+<script src="/js/keyIntegration.js"></script>
 <script src="/js/app.js"></script>
-
 </body>
 </html>

@@ -1,284 +1,128 @@
-const db = require("../config/database");
-const crypto = require("crypto");
-
+const db = require('../config/database');
+const crypto = require('crypto');
+const {uuid, fail, pair} = require('../utils/api');
+const {transaction, lockPair} = require('../utils/transactions');
 async function sendFriendRequest(req, res) {
-    try {
-        if (!req.session.userId) {
-            return res.status(401).json({
-                message: "Not authenticated"
-            });
+    const userId = req.session.userId, targetUserId = uuid(req.body.targetUserId, 'Target user ID');
+    if (targetUserId === userId) fail(400, 'You cannot add yourself');
+    const result = await transaction(async connection => {
+        const [target] = await connection.query('SELECT id FROM users WHERE id = ?', [targetUserId]);
+        if (!target.length) fail(404, 'User not found');
+        const friendship = await lockPair(connection, userId, targetUserId);
+        if (friendship?.status === 'blocked') fail(403, 'This user relationship is blocked');
+        if (friendship?.status === 'accepted') fail(409, 'You are already friends');
+        if (friendship?.status === 'pending') fail(409, 'A friend request is already pending');
+        if (friendship?.status === 'rejected') {
+            await connection.query("UPDATE friendships SET status = 'pending', requested_by = ?, created_at = CURRENT_TIMESTAMP(6) WHERE id = ?", [userId, friendship.id]);
+            return friendship.id;
         }
-        const userId = req.session.userId;
-        const { targetUserId } = req.body;
-        if (!targetUserId) {
-            return res.status(400).json({
-                message: "Target user ID is required"
-            });
-        }
-        if (userId === targetUserId) {
-            return res.status(400).json({
-                message: "You cannot add yourself"
-            });
-        }
-        const [targetUsers] = await db.promise().query(
-            "SELECT id FROM users WHERE id = ?",
-            [targetUserId]
-        );
-        if (targetUsers.length === 0) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-        const [existingFriendships] = await db.promise().query(
-            `SELECT id, status
-             FROM friendships
-             WHERE (user1_id = ? AND user2_id = ?)
-                OR (user1_id = ? AND user2_id = ?)`,
-            [userId, targetUserId, targetUserId, userId]
-        );
-        if (existingFriendships.length > 0) {
-            return res.status(409).json({
-                message: "Friendship already exists"
-            });
-        }
-        const user1Id = userId < targetUserId
-            ? userId
-            : targetUserId;
-        const user2Id = userId < targetUserId
-            ? targetUserId
-            : userId;
-        const friendshipId = crypto.randomUUID();
-        await db.promise().query(
-            `INSERT INTO friendships
-                (id, user1_id, user2_id, requested_by, status)
-             VALUES (?, ?, ?, ?, 'pending')`,
-            [
-                friendshipId,
-                user1Id,
-                user2Id,
-                userId
-            ]
-        );
-        res.status(201).json({
-            message: "Friend request sent"
-        });
-    } catch (error) {
-        console.error("Friend request error:", error);
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+        const id = crypto.randomUUID(), [first, second] = pair(userId, targetUserId);
+        await connection.query("INSERT INTO friendships (id, user1_id, user2_id, requested_by, status) VALUES (?, ?, ?, ?, 'pending')", [id, first, second, userId]);
+        return id;
+    });
+    res.status(201).json({message: 'Friend request sent', friendshipId: result});
 }
-
 async function getIncomingFriendRequests(req, res) {
-    try {
-        if (!req.session.userId) {
-            return res.status(401).json({
-                message: "Not authenticated"
-            });
-        }
-        const userId = req.session.userId;
-        const [requests] = await db.promise().query(
-            `SELECT
-                f.id,
-                f.requested_by,
-                u.username,
-                u.id AS user_id,
-                f.created_at
-             FROM friendships f
-             JOIN users u
-                ON u.id = f.requested_by
-             WHERE
-                (f.user1_id = ? OR f.user2_id = ?)
-                AND f.requested_by <> ?
-                AND f.status = 'pending'
-             ORDER BY f.created_at DESC`,
-            [userId, userId, userId]
-        );
-        res.json({
-            requests
-        });
-    } catch (error) {
-        console.error("Get friend requests error:", error);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+    const id = req.session.userId;
+    const [requests] = await db.promise().query(`SELECT f.id, f.requested_by, u.username, u.id AS user_id, f.created_at
+        FROM friendships f JOIN users u ON u.id = f.requested_by
+        WHERE (f.user1_id = ? OR f.user2_id = ?) AND f.requested_by <> ? AND f.status = 'pending'
+        ORDER BY f.created_at DESC`, [id, id, id]);
+    res.json({requests});
 }
-async function acceptFriendRequest(req, res) {
-    try {
-        if (!req.session.userId) {
-            return res.status(401).json({
-                message: "Not authenticated"
-            });
-        }
-
-        const userId = req.session.userId;
-        const { id } = req.params;
-
-        const [friendships] = await db.promise().query(
-            `SELECT id, requested_by, status
-             FROM friendships
-             WHERE id = ?`,
-            [id]
-        );
-
-        if (friendships.length === 0) {
-            return res.status(404).json({
-                message: "Friend request not found"
-            });
-        }
-
-        const friendship = friendships[0];
-
-        if (friendship.status !== "pending") {
-            return res.status(409).json({
-                message: "Friend request is no longer pending"
-            });
-        }
-
-        if (friendship.requested_by === userId) {
-            return res.status(403).json({
-                message: "You cannot accept your own friend request"
-            });
-        }
-
-        const [result] = await db.promise().query(
-            `UPDATE friendships
-             SET status = 'accepted'
-             WHERE id = ?
-               AND status = 'pending'`,
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(409).json({
-                message: "Friend request could not be accepted"
-            });
-        }
-
-        res.json({
-            message: "Friend request accepted"
-        });
-
-    } catch (error) {
-        console.error("Accept friend request error:", error);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+async function getOutgoingFriendRequests(req, res) {
+    const id = req.session.userId;
+    const [requests] = await db.promise().query(`SELECT f.id, u.id AS user_id, u.username, f.created_at
+        FROM friendships f JOIN users u ON u.id = CASE WHEN f.user1_id = ? THEN f.user2_id ELSE f.user1_id END
+        WHERE f.requested_by = ? AND f.status = 'pending' ORDER BY f.created_at DESC`, [id, id]);
+    res.json({requests});
 }
-async function rejectFriendRequest(req, res) {
-    try {
-        if (!req.session.userId) {
-            return res.status(401).json({
-                message: "Not authenticated"
-            });
-        }
-
-        const userId = req.session.userId;
-        const { id } = req.params;
-
-        const [friendships] = await db.promise().query(
-            `SELECT id, requested_by, user1_id, user2_id, status
-             FROM friendships
-             WHERE id = ?`,
-            [id]
-        );
-
-        if (friendships.length === 0) {
-            return res.status(404).json({
-                message: "Friend request not found"
-            });
-        }
-
-        const friendship = friendships[0];
-
-        if (friendship.status !== "pending") {
-            return res.status(409).json({
-                message: "Friend request is no longer pending"
-            });
-        }
-
-        if (friendship.requested_by === userId) {
-            return res.status(403).json({
-                message: "You cannot reject your own friend request"
-            });
-        }
-
-        const [result] = await db.promise().query(
-            `UPDATE friendships
-             SET status = 'rejected'
-             WHERE id = ?
-               AND status = 'pending'`,
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(409).json({
-                message: "Friend request could not be rejected"
-            });
-        }
-
-        res.json({
-            message: "Friend request rejected"
-        });
-
-    } catch (error) {
-        console.error("Reject friend request error:", error);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+async function cancelFriendRequest(req, res) {
+    const id = uuid(req.params.id, 'Friend request ID'), userId = req.session.userId;
+    await transaction(async connection => {
+        const [rows] = await connection.query('SELECT * FROM friendships WHERE id = ? FOR UPDATE', [id]);
+        if (!rows.length) fail(404, 'Friend request not found');
+        if (rows[0].requested_by !== userId) fail(403, 'Only the sender can cancel this request');
+        if (rows[0].status !== 'pending') fail(409, 'Friend request is no longer pending');
+        await connection.query('DELETE FROM friendships WHERE id = ?', [id]);
+    });
+    res.json({message: 'Friend request cancelled'});
 }
+async function decide(req, res, status) {
+    const id = uuid(req.params.id, 'Friend request ID'), userId = req.session.userId;
+    await transaction(async connection => {
+        const [rows] = await connection.query('SELECT * FROM friendships WHERE id = ? FOR UPDATE', [id]);
+        if (!rows.length) fail(404, 'Friend request not found');
+        const f = rows[0];
+        if (![f.user1_id, f.user2_id].includes(userId) || f.requested_by === userId) fail(403, 'Only the recipient can handle this friend request');
+        if (f.status !== 'pending') fail(409, 'Friend request is no longer pending');
+        await connection.query('UPDATE friendships SET status = ? WHERE id = ?', [status, id]);
+    });
+    res.json({message: status === 'accepted' ? 'Friend request accepted' : 'Friend request rejected'});
+}
+const acceptFriendRequest = (req, res) => decide(req, res, 'accepted');
+const rejectFriendRequest = (req, res) => decide(req, res, 'rejected');
 async function getFriends(req, res) {
-    try {
-        if (!req.session.userId) {
-            return res.status(401).json({
-                message: "Not authenticated"
-            });
-        }
-
-        const userId = req.session.userId;
-
-        const [friends] = await db.promise().query(
-            `SELECT
-                u.id,
-                u.username,
-                u.email
-             FROM friendships f
-             JOIN users u
-                ON u.id = CASE
-                    WHEN f.user1_id = ? THEN f.user2_id
-                    ELSE f.user1_id
-                END
-             WHERE
-                (f.user1_id = ? OR f.user2_id = ?)
-                AND f.status = 'accepted'
-             ORDER BY u.username`,
-            [userId, userId, userId]
-        );
-
-        res.json({
-            friends
-        });
-
-    } catch (error) {
-        console.error("Get friends error:", error);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+    const id = req.session.userId;
+    const [friends] = await db.promise().query(`SELECT u.id, u.username, u.email FROM friendships f
+        JOIN users u ON u.id = CASE WHEN f.user1_id = ? THEN f.user2_id ELSE f.user1_id END
+        WHERE (f.user1_id = ? OR f.user2_id = ?) AND f.status = 'accepted' ORDER BY u.username`, [id, id, id]);
+    res.json({friends});
 }
-
-module.exports = {
-    sendFriendRequest,
-    getIncomingFriendRequests,
-    acceptFriendRequest,
-    rejectFriendRequest,
-    getFriends
-};
+async function blockUser(req, res) {
+    const userId = req.session.userId, target = uuid(req.body.targetUserId, 'Target user ID');
+    if (userId === target) fail(400, 'You cannot block yourself');
+    await transaction(async connection => {
+        const [rows] = await connection.query('SELECT id FROM users WHERE id = ?', [target]);
+        if (!rows.length) fail(404, 'User not found');
+        const f = await lockPair(connection, userId, target);
+        if (f?.status === 'blocked') fail(409, 'This user relationship is already blocked');
+        if (f) await connection.query("UPDATE friendships SET blocked_previous_status = status, status = 'blocked', blocked_by = ?, blocked_at = CURRENT_TIMESTAMP(6) WHERE id = ?", [userId, f.id]);
+        else {
+            const [first, second] = pair(userId, target);
+            await connection.query("INSERT INTO friendships (id, user1_id, user2_id, requested_by, status, blocked_by, blocked_at) VALUES (?, ?, ?, ?, 'blocked', ?, CURRENT_TIMESTAMP(6))", [crypto.randomUUID(), first, second, userId, userId]);
+        }
+    });
+    res.json({message: 'User blocked'});
+}
+async function getBlockedUsers(req, res) {
+    const id = req.session.userId;
+    const [users] = await db.promise().query(`SELECT f.id AS friendship_id, u.id, u.username, f.blocked_at, f.blocked_previous_status FROM friendships f
+        JOIN users u ON u.id = CASE WHEN f.user1_id = ? THEN f.user2_id ELSE f.user1_id END
+        WHERE f.status = 'blocked' AND f.blocked_by = ? ORDER BY f.blocked_at DESC`, [id, id]);
+    res.json({users});
+}
+async function unblockUser(req, res) {
+    const userId = req.session.userId, target = uuid(req.body.targetUserId, 'Target user ID');
+    if (userId === target) fail(400, 'You cannot unblock yourself');
+    const restored = await transaction(async connection => {
+        const [users] = await connection.query('SELECT id FROM users WHERE id = ?', [target]);
+        if (!users.length) fail(404, 'User not found');
+        const f = await lockPair(connection, userId, target);
+        if (!f || f.status !== 'blocked') fail(409, 'This relationship is not blocked');
+        if (f.blocked_by !== userId) fail(403, 'Only the user who blocked this relationship can unblock it');
+        if (f.blocked_previous_status === 'accepted') {
+            await connection.query("UPDATE friendships SET status = 'accepted', blocked_by = NULL, blocked_at = NULL, blocked_previous_status = NULL WHERE id = ?", [f.id]);
+            return true;
+        }
+        // Unblock a non-friend without granting permission to send messages.
+        await connection.query('DELETE FROM friendships WHERE id = ?', [f.id]);
+        return false;
+    });
+    res.json({message: restored ? 'User unblocked. Friendship restored.' : 'User unblocked. You can send a new friend request.', friendshipRestored: restored});
+}
+async function removeFriend(req, res) {
+    const userId = req.session.userId, target = uuid(req.body.targetUserId, 'Target user ID');
+    if (userId === target) fail(400, 'You cannot remove yourself');
+    await transaction(async connection => {
+        const [users] = await connection.query('SELECT id FROM users WHERE id = ?', [target]);
+        if (!users.length) fail(404, 'User not found');
+        const f = await lockPair(connection, userId, target);
+        if (!f) fail(404, 'Friendship not found');
+        if (f.status !== 'accepted') fail(409, 'You can only remove an accepted friendship');
+        await connection.query('DELETE FROM friendships WHERE id = ?', [f.id]);
+    });
+    res.json({message: 'Friend removed. Chat history is kept; new messages require a new accepted request.'});
+}
+module.exports = {sendFriendRequest, getIncomingFriendRequests, getOutgoingFriendRequests, cancelFriendRequest,
+    acceptFriendRequest, rejectFriendRequest, getFriends, blockUser, getBlockedUsers, unblockUser, removeFriend};

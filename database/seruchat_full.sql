@@ -7,11 +7,11 @@
 
 SET NAMES utf8mb4;
 
-CREATE DATABASE IF NOT EXISTS seruchat
+CREATE DATABASE IF NOT EXISTS seruchat_full
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE seruchat;
+USE seruchat_full;
 
 -- 1. Tai khoan. ID do crypto.randomUUID() cua Node.js tao.
 -- Username KHONG unique: code hien tai chi quy dinh email la duy nhat.

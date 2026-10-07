@@ -1,0 +1,5 @@
+server/node_modules/
+server/.env
+encryption/*.class
+encryption/keys/
+*.log
