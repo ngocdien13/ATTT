@@ -3,6 +3,15 @@
 // getOrCreateKeyPair's transport flow, preventing key creation on HTTP errors
 // and encrypted backups derived from a missing password after page reload.
 const keySetupTasks = new Map();
+async function validateChatKeyPair(pair) {
+    const ephemeral = await generateKeyPair();
+    const left = new Uint8Array(await crypto.subtle.deriveBits({name: 'X25519', public: pair.publicKey}, ephemeral.privateKey, 256));
+    const right = new Uint8Array(await crypto.subtle.deriveBits({name: 'X25519', public: ephemeral.publicKey}, pair.privateKey, 256));
+    let difference = left.length ^ right.length;
+    for (let i = 0; i < left.length; i++) difference |= left[i] ^ right[i];
+    left.fill(0); right.fill(0);
+    if (difference) throw new Error('Private key does not match the registered public key. No replacement key was created.');
+}
 async function keyApi(url, options) {
     const response = await fetch(url, options);
     const body = await response.json();
@@ -22,12 +31,14 @@ async function setupChatKey(userId, password) {
     if (response.status === 404) {
         if (!password) throw new Error('Please log in again to finish key setup.');
         const pair = local || await generateKeyPair();
+        await validateChatKeyPair(pair);
         // Store locally before publishing, so retry cannot generate a new key.
         await saveKeyPair(userId, pair);
         await publishChatKey(pair, password);
         return pair;
     }
     if (local && await exportPublicKey(local.publicKey) === body.publicKey) {
+        await validateChatKeyPair(local);
         if (password) {
             const backup = await keyApi('/api/keys/private');
             if (backup.response.status === 404) await publishChatKey(local, password);
@@ -43,6 +54,7 @@ async function setupChatKey(userId, password) {
     catch (error) { throw new Error('Cannot unlock the saved private key. Check the password and use the original device.'); }
     const publicKey = await crypto.subtle.importKey('spki', bytes(body.publicKey), {name: 'X25519'}, true, []);
     const pair = {publicKey, privateKey};
+    await validateChatKeyPair(pair);
     await saveKeyPair(userId, pair);
     return pair;
 }

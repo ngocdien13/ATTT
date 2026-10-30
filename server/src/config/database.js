@@ -1,7 +1,8 @@
 const path = require('path');
 require('dotenv').config({path: path.resolve(__dirname, '../../.env'), quiet: true});
+require('./loadSecrets')();
 const mysql = require('mysql2');
-module.exports = mysql.createPool({
+const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER || 'root',
@@ -14,3 +15,7 @@ module.exports = mysql.createPool({
     bigNumberStrings: true,
     timezone: 'Z'
 });
+
+// Align server NOW()/TIMESTAMP reads with the driver UTC interpretation.
+pool.on('connection', connection => { connection.query("SET SESSION time_zone = '+00:00'", error => {if(error) connection.destroy();}); });
+module.exports=pool;

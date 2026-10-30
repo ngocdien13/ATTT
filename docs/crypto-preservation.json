@@ -1,8 +1,8 @@
 {
   "browser_files": {
-    "keyManager.js": "1e181815105f349ea18ad5117361c43ed75f67dda980ba26fb5878aeb72d2ea3",
-    "encryption.js": "d98efd1d4e8b1dcae5f83a088afc888becb80113a220b6684333059852876c3a",
-    "decryption.js": "f7209d6e56e7a59bdc20c6ce4c1b2973dcb50ce57882dc5e2976013e18cc4f16"
+    "keyManager.js": "f5871e8cf3a802e7fa8fd71328b3b8698f30ff14c99496dbd576ee5e2c0009cc",
+    "encryption.js": "b4d79a115725199f343d14b8b61c02e00de2e80c78287699de76a3a35c2883c6",
+    "decryption.js": "ecdf2c39dd30f1f2da8761194e49bac35afa466a9ed5bfb2d88c1f62faf5a1a4"
   },
   "java_methods": {
     "Sender.java": {
@@ -20,5 +20,12 @@
       "receiveMessage": "92bca29cecc9c4a82c4498de2f591dadb1241a1df918e70dddb95ee8c1ca6baf"
     }
   },
-  "normalization": "Java Markdown escapes and non-breaking indentation removed; method-body whitespace ignored. HTTP/storage/CLI orchestration may change."
+  "normalization": "Java Markdown escapes and non-breaking indentation removed; method-body whitespace ignored. HTTP/storage/CLI orchestration may change.",
+  "historical_upload_hashes": {
+    "keyManager.js": "1e181815105f349ea18ad5117361c43ed75f67dda980ba26fb5878aeb72d2ea3",
+    "encryption.js": "d98efd1d4e8b1dcae5f83a088afc888becb80113a220b6684333059852876c3a",
+    "decryption.js": "f7209d6e56e7a59bdc20c6ce4c1b2973dcb50ce57882dc5e2976013e18cc4f16"
+  },
+  "reference_commit": "7f2894fcceb1b960e47613b561eac200b78cb58b",
+  "provenance_note": "Historical upload hashes do not match the unmodified repository baseline. Current invariants are pinned to the actual GitHub commit above; browser crypto source bytes were not edited."
 }

@@ -1,0 +1,35 @@
+Seruchat — refinement to supplied UI references, 2026-10-30
+
+Runtime: Node 24.22.1, real isolated MySQL 8.0.46, Chromium
+153.0.8010.0 through Playwright 1.62.1; Java compatibility uses JDK21.
+Mobile verification uses a 390x844 browser viewport, not a physical device.
+
+API/crypto: 76 tests passed; zero failures/skips.
+Browser suites: legacy compatibility + groups/files + reference-ui passed.
+The browser test harness supplies local test fonts; no browser binary or
+test runtime dependencies are included in the deliverable.
+
+Reference UI checks: 2048x1009 layout, sidebar/rows, actual loaded Roboto
+font and local wallpaper, seven-item main/context menus, More submenu,
+quick preview, authenticated new-tab links, signed message sending,
+profile/settings panels, room pin/archive, stable list DOM through polling,
+390px list/menu/chat, failed account switch preserving current account,
+successful PIN-backed account switch and clearing old state in another tab.
+
+Source has no new database migration. New UI uses the existing API and
+keeps a single application database. Theme defaults to light; existing
+explicit theme choice is preserved.
+
+PASS: signed direct/reaction/edit/reply/pin/recall; saved encrypted notes; per-user pin/archive/mute/unread persistence; TOTP-gated admin browser UI
+PASS: logout prevents pending decrypted notes repopulating UI and clears drafts
+PASS: legacy rows unchanged; browser recipient/self; Unsent draft is preserved; cached signed tampering rejected; fresh profile restore; Java compilation; Java v1 adapter ↔ web; profile + avatar UI; password change + independent PIN fresh-device history restore; registration + handle search UI; dark mode; 390px mobile; emoji + client search; no page errors.
+PASS: alpha PIN enrollment
+PASS: three independent accounts enrolled
+PASS: signed unauthorized group edits/pins ignored; owner pin/unpin synchronized
+PASS: ten consecutive Enter sends; receiver delivery; idle DOM stays stable; draft + scroll preserved
+PASS: group/direct drafts and rapid switching preserve the selected conversation
+PASS: fresh profile requires PIN; five failures + countdown + reload; independent code recovers history; trusted reload
+PASS: real 3-browser signed group/invite/accept; new-member old-history exclusion; group/direct binary files + real downloads + oversized/tampered binary rejection; safe PNG/JPEG/WebP previews + disguised SVG rejection; cached tamper rejection; pinned-key substitution blocked; signed rename + removal; former member old/new file authorization; fresh-device identity restore; mobile390px; no page errors.
+PASS: authenticated reference layout and local assets
+PASS: context actions, quick preview, new-tab link and signed sending
+PASS: 2048/390px, profile/settings, pin/archive, stable chat-list DOM and authenticated account switching

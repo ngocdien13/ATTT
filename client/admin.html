@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Seruchat · Quản trị</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="stylesheet" href="/css/telegram.css" />
+  </head>
+  <body class="telegram admin-page">
+    <main class="admin-shell">
+      <header>
+        <h1>Seruchat · Quản trị</h1>
+        <a href="/">Về ứng dụng</a>
+      </header>
+      <p id="adminStatus" role="status"></p>
+      <section id="adminLogin">
+        <h2>Đăng nhập quản trị</h2>
+        <form id="adminLoginForm">
+          <label
+            >Email<input
+              id="adminEmail"
+              type="email"
+              autocomplete="username"
+              required /></label
+          ><label
+            >Mật khẩu<input
+              id="adminPassword"
+              type="password"
+              autocomplete="current-password"
+              required /></label
+          ><button type="submit" class="primary">Đăng nhập</button>
+        </form>
+      </section>
+      <section id="adminMfa" hidden>
+        <h2>Xác thực quản trị</h2>
+        <form id="mfaSetup">
+          <p>Thiết lập ứng dụng xác thực OTP trước khi truy cập quản trị.</p>
+          <label
+            >Mật khẩu hiện tại<input
+              id="setupPassword"
+              type="password"
+              autocomplete="current-password"
+              required /></label
+          ><button type="submit">Tạo thiết lập OTP</button>
+        </form>
+        <p id="mfaSecret"></p>
+        <p id="mfaHelp"></p>
+        <form id="mfaVerify">
+          <label
+            >Mã 6 số từ ứng dụng xác thực<input
+              id="otpCode"
+              inputmode="numeric"
+              pattern="[0-9]{6}"
+              autocomplete="one-time-code"
+              required /></label
+          ><button type="submit" class="primary">Xác thực</button>
+        </form>
+      </section>
+      <section id="adminDashboard" hidden>
+        <div class="admin-actions">
+          <button id="refreshAdmin">Làm mới</button
+          ><button id="logoutAdmin">Đăng xuất</button>
+        </div>
+        <div id="adminStats" class="stats-grid"></div>
+        <h2>Tài khoản</h2>
+        <form id="userSearch">
+          <label>Tìm tên/email<input id="adminQuery" type="search" /></label
+          ><button type="submit">Tìm</button>
+        </form>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Tài khoản</th>
+                <th>Email</th>
+                <th>Quyền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsers"></tbody>
+          </table>
+        </div>
+        <div class="admin-actions">
+          <button id="previousPage">Trang trước</button
+          ><span id="pageLabel"></span><button id="nextPage">Trang sau</button>
+        </div>
+        <h2>Báo cáo lạm dụng</h2>
+        <div id="adminReports"></div>
+        <h2>Nhật ký quản trị</h2>
+        <p id="auditState"></p>
+        <div id="adminAudit"></div>
+      </section>
+    </main>
+    <dialog id="adminConfirm">
+      <h2>Xác nhận thao tác tài khoản</h2>
+      <p id="confirmUser"></p>
+      <form id="adminConfirmForm">
+        <label
+          >Mật khẩu hiện tại<input
+            id="actionPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+        /></label>
+        <div class="admin-actions">
+          <button type="submit" class="primary">Xác nhận</button
+          ><button id="cancelAdminAction" type="button">Hủy</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="/js/captcha.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

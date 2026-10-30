@@ -1,0 +1,25 @@
+{
+ email {$ACME_EMAIL}
+}
+{$DOMAIN} {
+ encode zstd gzip
+ header {
+  Strict-Transport-Security "max-age=31536000"
+  X-Content-Type-Options nosniff
+  Referrer-Policy no-referrer
+  -Server
+ }
+ request_body {
+  max_size 51MB
+ }
+ reverse_proxy app:3000 {
+  transport http {
+   dial_timeout 5s
+   response_header_timeout 130s
+  }
+ }
+ log {
+  output stdout
+  format json
+ }
+}

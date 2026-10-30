@@ -1,218 +1,782 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seruchat</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-<main>
-    <!-- Login -->
-    <section id="loginSection">
-        <h1>Secure Chat</h1>
-        <form id="loginForm">
-            <label for="loginEmail">
-                Email
-            </label>
-            <input
-                    type="email"
-                    id="loginEmail"
-                    placeholder="Email"
-                    required
-            >
-            <label for="loginPassword">
-                Password
-            </label>
-            <input
-                    type="password"
-                    id="loginPassword"
-                    placeholder="Password"
-                    required
-            >
-            <button type="submit">
-                Login
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Seruchat · Gần nhau hơn</title>
+    <link
+      rel="preload"
+      href="/fonts/roboto.woff"
+      as="font"
+      type="font/woff"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/telegram.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Đến nội dung</a>
+    <div class="topbar">
+      <a href="/" class="brand"
+        ><span class="brand-icon">s</span> seruchat<span class="brand-dot"
+          >●</span
+        ></a
+      ><button
+        id="themeToggle"
+        class="quiet"
+        aria-label="Đổi giao diện sáng tối"
+      >
+        ◐ Giao diện
+      </button>
+    </div>
+    <main id="main">
+      <section id="loginSection" class="auth-layout">
+        <div class="auth-story">
+          <span class="eyebrow">KHÔNG GIAN CỦA BẠN</span>
+          <h1>Một lời chào.<br />Nhiều kết nối<span>.</span></h1>
+          <p>Những câu chuyện thường ngày, được giữ giữa bạn và người nhận.</p>
+          <div class="story-bubbles" aria-hidden="true">
+            <span>Ê, hôm nay thế nào? ☀️</span
+            ><span>Đi cà phê kể tiếp nhé! 💛</span>
+          </div>
+          <div class="security-note">
+            ◈ Mã hóa đầu cuối cho nội dung chat cá nhân
+          </div>
+        </div>
+        <div class="auth-card">
+          <span class="eyebrow">CHÀO MỪNG TRỞ LẠI</span>
+          <h2>Vào trò chuyện thôi.</h2>
+          <p class="muted">Đăng nhập để tiếp tục câu chuyện của bạn.</p>
+          <form id="loginForm">
+            <label for="loginEmail">Email</label
+            ><input
+              type="email"
+              id="loginEmail"
+              autocomplete="username"
+              placeholder="ban@example.com"
+              required
+            /><label for="loginPassword">Mật khẩu</label
+            ><input
+              type="password"
+              id="loginPassword"
+              autocomplete="current-password"
+              required
+            /><button type="submit" class="primary">
+              Đăng nhập <span aria-hidden="true">↗</span>
             </button>
+          </form>
+          <p id="loginMessage" role="status"></p>
+          <div class="auth-links">
+            <button id="forgotPassword" class="link">Quên mật khẩu?</button
+            ><button id="verifyEmail" class="link">Xác minh email</button>
+          </div>
+          <hr />
+          <p>
+            Chưa có tài khoản?
+            <button id="showRegister" class="link">Tạo tài khoản</button>
+          </p>
+        </div>
+      </section>
+      <section id="registerSection" class="auth-card register-card" hidden>
+        <span class="eyebrow">BẮT ĐẦU KẾT NỐI</span>
+        <h1>Tạo không gian của bạn.</h1>
+        <p class="muted">Chọn tên để bạn bè dễ tìm thấy bạn.</p>
+        <form id="registerForm" class="form-grid">
+          <div>
+            <label for="registerUsername">Tên hiển thị</label
+            ><input
+              id="registerUsername"
+              maxlength="100"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div>
+            <label for="registerHandle">Tên người dùng duy nhất</label
+            ><input
+              id="registerHandle"
+              pattern="[a-zA-Z0-9_]{3,40}"
+              maxlength="40"
+              placeholder="ngocdien"
+              required
+            />
+          </div>
+          <div>
+            <label for="registerEmail">Email</label
+            ><input
+              type="email"
+              id="registerEmail"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div>
+            <label for="registerPhone">Số điện thoại Việt Nam</label
+            ><input
+              id="registerPhone"
+              autocomplete="tel"
+              placeholder="0912 345 678 (tùy chọn)"
+            />
+          </div>
+          <div>
+            <label for="registerBirth">Ngày sinh</label
+            ><input
+              type="date"
+              id="registerBirth"
+              autocomplete="bday"
+              required
+            />
+          </div>
+          <div>
+            <label for="registerPassword">Mật khẩu · 12–128 ký tự</label
+            ><input
+              type="password"
+              id="registerPassword"
+              minlength="12"
+              maxlength="128"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+          <div class="wide">
+            <label for="confirmPassword">Nhập lại mật khẩu</label
+            ><input
+              type="password"
+              id="confirmPassword"
+              minlength="12"
+              maxlength="128"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+          <label class="check wide"
+            ><input type="checkbox" id="registerTerms" required /> Tôi đồng ý
+            <a href="/terms.html" target="_blank" rel="noopener"
+              >điều khoản và quyền riêng tư</a
+            >.</label
+          ><button type="submit" class="primary wide">Tạo tài khoản ↗</button>
         </form>
-        <p id="loginMessage"></p>
-        <button type="button" id="showRegister">
-            Create account
-        </button>
-    </section>
-    <!-- Register -->
-    <section id="registerSection" hidden>
-        <h1>Create Account</h1>
-        <form id="registerForm">
-            <label for="registerUsername">
-                Username
-            </label>
-            <input
-                    type="text"
-                    id="registerUsername"
-                    placeholder="Username"
-                    required
-            >
-            <label for="registerEmail">
-                Email
-            </label>
-            <input
-                    type="email"
-                    id="registerEmail"
-                    placeholder="Email"
-                    required
-            >
-            <label for="registerPassword">
-                Password
-            </label>
-            <input
-                    type="password"
-                    id="registerPassword"
-                    placeholder="Password"
-                    required
-            >
-            <label for="confirmPassword">
-                Confirm password
-            </label>
-            <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Confirm password"
-                    required
-            >
-            <button type="submit">
-                Create account
-            </button>
-        </form>
-        <p id="registerMessage"></p>
-        <button type="button" id="showLogin">
-            Back to login
-        </button>
-    </section>
-    <!-- User area -->
-    <section id="userInfo" hidden>
-        <p id="keyStatus" role="status"></p>
-        <p id="operationStatus" role="status" aria-live="polite"></p>
-        <header>
-            <h1>Secure Chat</h1>
+        <p id="registerMessage" role="status"></p>
+        <button id="showLogin" class="link">← Quay lại đăng nhập</button>
+      </section>
+      <section id="userInfo" hidden>
+        <header class="app-header">
+          <div class="identity">
+            <img
+              id="myAvatar"
+              class="avatar"
+              alt="Ảnh đại diện của bạn"
+              hidden
+            />
             <div>
-                <p id="username"></p>
-                <p id="userEmail"></p>
-                <p>
-                    Your User ID:
-                    <span id="currentUserId"></span>
-                </p>
-                <button
-                        type="button"
-                        id="copyUserId"
-                >
-                    Copy User ID
-                </button>
-                <p id="copyMessage"></p>
-                <button
-                        type="button"
-                        id="logout"
-                >
-                    Logout
-                </button>
-                <p id="logoutMessage"></p>
+              <h1 id="username">Seruchat</h1>
+              <p id="userEmail" class="muted"></p>
             </div>
+          </div>
+          <div class="header-actions">
+            <button id="openProfile">Hồ sơ & cài đặt</button
+            ><button id="logout" class="quiet">Đăng xuất</button>
+          </div>
+          <p id="logoutMessage" role="status"></p>
         </header>
-        <!-- Find user -->
-        <section id="findUserSection">
-            <h2>Tìm người dùng</h2>
-            <form id="findUserForm">
-                <label for="userId">
-                    User ID
-                </label>
-                <input
-                        type="text"
-                        id="userId"
-                        placeholder="Enter user ID"
-                        required
-                >
-                <button type="submit">
-                    Find User
-                </button>
-            </form>
-            <p id="findUserMessage"></p>
-        </section>
-        <!-- Found user -->
-        <section id="foundUser" hidden>
-            <h2>User</h2>
-            <p>
-                Username:
-                <span id="foundUsername"></span>
-            </p>
-            <p>
-                User ID:
-                <span id="foundUserId"></span>
-            </p>
+        <div class="status-line">
+          <span id="keyStatus" hidden role="status"></span
+          ><span id="operationStatus" role="status" aria-live="polite"></span>
+        </div>
+        <div class="workspace">
+          <nav class="app-rail" aria-label="Điều hướng chính">
+            <span class="rail-logo" aria-label="Seruchat">s</span>
             <button
-                    type="button"
-                    id="addFriend"
+              type="button"
+              data-nav="conversationsSection"
+              class="active"
+              aria-label="Trò chuyện"
             >
-                Kết bạn
+              <svg><use href="/icons.svg#chat" /></svg><span>Chat</span>
             </button>
-            <p id="friendMessage"></p>
-            <button type="button" id="blockFoundUser">Chặn</button>
-            <p id="foundRelationship"></p>
-            <div id="foundExtraActions"></div>
-        </section>
-        <!-- Friend requests -->
-        <section id="friendRequestsSection">
-            <h2>Lời mời nhận được</h2>
-            <div id="friendRequests">
-                <!-- Friend requests will be inserted here -->
+            <button type="button" data-nav="peoplePane" aria-label="Bạn bè">
+              <svg><use href="/icons.svg#people" /></svg><span>Bạn bè</span>
+            </button>
+            <button type="button" data-nav="groupPane" aria-label="Nhóm">
+              <svg><use href="/icons.svg#group" /></svg><span>Nhóm</span>
+            </button>
+            <button
+              type="button"
+              data-nav="findUserSection"
+              aria-label="Tìm bạn"
+            >
+              <svg><use href="/icons.svg#search" /></svg><span>Tìm bạn</span>
+            </button>
+            <button type="button" id="railProfile" aria-label="Hồ sơ">
+              <svg><use href="/icons.svg#profile" /></svg><span>Hồ sơ</span>
+            </button>
+          </nav>
+          <aside class="sidebar">
+            <div class="sidebar-title">
+              <h2>Chat<span class="chat-dot">.</span></h2>
+              <button
+                id="refreshConnections"
+                class="quiet"
+                aria-label="Làm mới kết nối"
+              >
+                ↻
+              </button>
             </div>
-        </section>
-        <section id="outgoingRequestsSection"><h2>Lời mời đã gửi</h2><div id="outgoingRequests"></div></section>
-        <!-- Friends -->
-        <section id="friendsSection">
-            <h2>Bạn bè</h2>
-            <div id="friendsList">
-                <!-- Friends will be inserted here -->
+            <label class="sr-only" for="conversationSearch">Lọc danh sách</label
+            ><input
+              id="conversationSearch"
+              placeholder="Tìm trong danh sách…"
+              type="search"
+            />
+            <nav class="tabs" aria-label="Danh sách kết nối">
+              <button
+                data-pane="conversationsSection"
+                class="active"
+                aria-pressed="true"
+              >
+                Trò chuyện</button
+              ><button data-pane="peoplePane" aria-pressed="false">
+                Bạn bè</button
+              ><button data-pane="groupPane" aria-pressed="false">Nhóm</button>
+              <button data-pane="findUserSection" aria-pressed="false">
+                Tìm người
+              </button>
+            </nav>
+            <section id="conversationsSection">
+              <h3 class="sr-only">Cuộc trò chuyện</h3>
+              <div id="conversationsList"></div>
+            </section>
+            <section id="groupPane" hidden>
+              <button id="newGroup" class="primary" disabled>+ Tạo nhóm</button>
+              <p id="v2Status" role="status"></p>
+              <h3>Lời mời nhóm</h3>
+              <div id="groupInvitations"></div>
+              <h3>Nhóm của bạn</h3>
+              <div id="groupsList"></div>
+            </section>
+            <div id="peoplePane" hidden>
+              <section id="friendRequestsSection">
+                <h3>Lời mời nhận được</h3>
+                <div id="friendRequests"></div>
+              </section>
+              <section id="outgoingRequestsSection">
+                <h3>Lời mời đã gửi</h3>
+                <div id="outgoingRequests"></div>
+              </section>
+              <section id="friendsSection">
+                <h3>Bạn bè</h3>
+                <div id="friendsList"></div>
+              </section>
+              <section id="blockedUsersSection">
+                <h3>Người đã chặn</h3>
+                <div id="blockedUsers"></div>
+              </section>
             </div>
-        </section>
-        <!-- Conversations -->
-        <section id="blockedUsersSection"><h2>Người đã chặn</h2><div id="blockedUsers"></div></section>
-        <section id="conversationsSection">
-            <h2>Cuộc trò chuyện</h2>
-            <div id="conversationsList">
-                <!-- Conversations will be inserted here -->
+            <section id="findUserSection" hidden>
+              <h3>Tìm một người bạn</h3>
+              <form id="handleSearchForm">
+                <label for="handleQuery">Tên người dùng</label
+                ><input
+                  id="handleQuery"
+                  placeholder="@ngocdien"
+                  minlength="3"
+                  required
+                /><button type="submit">Tìm bạn</button>
+              </form>
+              <div id="handleResults" aria-live="polite"></div>
+              <details>
+                <summary>Tìm bằng mã người dùng</summary>
+                <form id="findUserForm">
+                  <label for="userId">Mã người dùng</label
+                  ><input id="userId" required /><button type="submit">
+                    Tìm người dùng
+                  </button>
+                </form>
+              </details>
+              <p id="findUserMessage" role="status"></p>
+              <section id="foundUser" hidden>
+                <h3 id="foundUsername"></h3>
+                <p id="foundUserId" class="muted" hidden></p>
+                <p id="foundBio"></p>
+                <p id="foundRelationship"></p>
+                <button id="addFriend">Kết bạn</button
+                ><button id="blockFoundUser" class="danger">Chặn</button>
+                <p id="friendMessage"></p>
+                <div id="foundExtraActions"></div>
+              </section>
+            </section>
+            <div class="sidebar-footer" hidden>
+              <span class="muted">ID của bạn</span
+              ><span id="currentUserId"></span
+              ><button id="copyUserId" class="link">Sao chép ID</button
+              ><span id="copyMessage" role="status"></span>
             </div>
-        </section>
-        <section id="chatSection" hidden>
-            <h2>Chat</h2>
-            <p id="chatUser"></p>
-            <p id="chatRelationship" role="status"></p>
-            <div id="chatActions"></div>
-            <div id="messagesList">
-                <!-- Messages will be inserted here -->
+          </aside>
+          <div class="chat-stage">
+            <section id="groupChatSection" hidden>
+              <header class="chat-header">
+                <button
+                  id="groupBack"
+                  class="quiet"
+                  aria-label="Quay lại danh sách"
+                >
+                  ←</button
+                ><img id="groupAvatar" class="avatar" alt="Ảnh nhóm" hidden />
+                <div>
+                  <h2 id="groupTitle"></h2>
+                  <span id="groupSubtitle" class="muted"></span>
+                </div>
+                <button id="groupSettings" class="quiet">Quản lý nhóm</button>
+              </header>
+              <p id="groupTrust" class="security-note"></p>
+              <button id="groupOlder" class="quiet" hidden>
+                Tải tin cũ hơn
+              </button>
+              <div id="groupMessages" aria-label="Tin nhắn nhóm"></div>
+              <progress
+                id="groupProgress"
+                max="100"
+                value="0"
+                hidden
+                aria-label="Tiến trình tải file"
+              ></progress>
+              <div id="groupEmojiPicker" hidden aria-label="Emoji nhóm"></div>
+              <form id="groupMessageForm">
+                <button
+                  id="groupEmojiToggle"
+                  type="button"
+                  class="quiet"
+                  aria-label="Chọn emoji nhóm"
+                  aria-expanded="false"
+                >
+                  ☺</button
+                ><label class="file-button" for="groupFile" title="Gửi tệp"
+                  >+<span class="sr-only">Chọn tệp</span></label
+                ><input id="groupFile" type="file" class="sr-only" /><textarea
+                  id="groupMessageInput"
+                  rows="1"
+                  placeholder="Nhắn với cả nhóm…"
+                  aria-label="Tin nhắn nhóm"
+                  required
+                ></textarea
+                ><button type="submit" class="primary">Gửi ↗</button>
+              </form>
+              <p id="groupMessageStatus" role="status"></p>
+            </section>
+            <div id="chatWelcome" class="welcome">
+              <span class="welcome-icon" aria-hidden="true">✳</span
+              ><span class="eyebrow">MỘT CHÚT GẦN NHAU HƠN</span>
+              <h2>Câu chuyện bắt đầu<br />từ một lời chào.</h2>
+              <p>Chọn cuộc trò chuyện hoặc tìm một người bạn.</p>
+              <span class="security-note"
+                >◈ Nội dung được mã hóa trên thiết bị của bạn.</span
+              >
             </div>
-            <form id="messageForm">
-                <textarea id="messageInput" rows="2" placeholder="Nhập tin nhắn. Ctrl + Enter để gửi." aria-label="Tin nhắn" required></textarea>
-                <button type="submit" id="sendMessageButton">
-                    Send
+            <section id="chatSection" hidden>
+              <header class="chat-header">
+                <button
+                  id="backToList"
+                  class="quiet"
+                  aria-label="Quay lại danh sách"
+                >
+                  ←
                 </button>
-            </form>
-            <p id="messageStatus"></p>
-        </section>
-    </section>
-</main>
-<dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription">
-    <form method="dialog">
+                <div>
+                  <h2 id="chatUser">Trò chuyện</h2>
+                  <span class="muted">Trò chuyện riêng tư</span>
+                </div>
+                <div id="chatActions"></div>
+              </header>
+              <p id="chatRelationship" role="status"></p>
+              <div class="chat-tools">
+                <label class="sr-only" for="messageSearch"
+                  >Tìm trong tin đã tải</label
+                ><input
+                  id="messageSearch"
+                  type="search"
+                  placeholder="Tìm trong tin đã tải · chỉ trên máy này"
+                />
+              </div>
+              <button id="loadOlder" class="quiet" hidden>
+                Tải tin cũ hơn
+              </button>
+              <div id="messagesList" aria-label="Tin nhắn"></div>
+              <div id="emojiPicker" hidden aria-label="Chọn emoji"></div>
+              <progress
+                id="directProgress"
+                max="100"
+                value="0"
+                hidden
+                aria-label="Tiến trình tải file"
+              ></progress
+              ><button id="directFilesOlder" class="quiet" hidden>
+                Tải file cũ hơn
+              </button>
+              <form id="messageForm">
+                <label class="file-button" for="directFile" title="Gửi tệp"
+                  >+<span class="sr-only">Chọn tệp</span></label
+                ><input id="directFile" type="file" class="sr-only" />
+                <button
+                  id="emojiToggle"
+                  type="button"
+                  class="quiet"
+                  aria-label="Mở bảng emoji"
+                  aria-expanded="false"
+                >
+                  ☺</button
+                ><textarea
+                  id="messageInput"
+                  rows="2"
+                  placeholder="Gửi một lời nhắn…"
+                  aria-label="Tin nhắn"
+                  required
+                ></textarea
+                ><button type="submit" id="sendMessageButton" class="primary">
+                  Gửi ↗
+                </button>
+              </form>
+              <p id="messageStatus" role="status"></p>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog id="profileDialog" aria-labelledby="profileTitle">
+      <div class="dialog-top">
+        <h2 id="profileTitle">Hồ sơ & cài đặt</h2>
+        <button id="closeProfile" class="quiet" aria-label="Đóng cài đặt">
+          ✕
+        </button>
+      </div>
+      <p id="profileStatus" role="status"></p>
+      <form id="profileForm" class="form-grid">
+        <div>
+          <label for="profileName">Tên hiển thị</label
+          ><input id="profileName" maxlength="100" required />
+        </div>
+        <div>
+          <label for="profileHandle">Tên người dùng</label
+          ><input id="profileHandle" pattern="[a-zA-Z0-9_]{3,40}" required />
+        </div>
+        <div>
+          <label for="profileBirth">Ngày sinh (riêng tư mặc định)</label
+          ><input id="profileBirth" type="date" required />
+        </div>
+        <div>
+          <label for="profilePhone">Số điện thoại</label
+          ><input id="profilePhone" autocomplete="tel" />
+        </div>
+        <div class="wide">
+          <label for="profileBio">Giới thiệu</label
+          ><textarea id="profileBio" maxlength="300" rows="2"></textarea>
+        </div>
+        <label class="check"
+          ><input type="checkbox" id="profileShowPhone" /> Hiện SĐT khi đã xác
+          minh</label
+        ><label class="check"
+          ><input type="checkbox" id="profileShowBirth" /> Hiện ngày/tháng
+          sinh</label
+        ><button class="primary wide" type="submit">Lưu hồ sơ</button>
+      </form>
+      <section class="settings-block">
+        <h3>Ảnh đại diện</h3>
+        <p class="muted">Chọn ảnh PNG, JPEG hoặc WebP, tối đa 2 MB.</p>
+        <form id="avatarForm">
+          <label for="avatarFile">Chọn ảnh</label
+          ><input
+            id="avatarFile"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            required
+          /><button type="submit">Cập nhật ảnh</button
+          ><button type="button" id="deleteAvatar" class="quiet">
+            Xóa ảnh
+          </button>
+        </form>
+      </section>
+      <section class="settings-block">
+        <h3>Xác minh liên hệ</h3>
+        <p id="verificationState"></p>
+        <button id="resendEmail">Gửi email xác minh</button
+        ><button id="sendPhone">Gửi mã SMS</button>
+        <form id="phoneForm">
+          <label for="phoneCode">Mã SMS 6 số</label
+          ><input
+            id="phoneCode"
+            inputmode="numeric"
+            pattern="[0-9]{6}"
+            autocomplete="one-time-code"
+            required
+          /><button type="submit">Xác minh số điện thoại</button>
+        </form>
+      </section>
+      <section class="settings-block">
+        <h3>Đổi mật khẩu</h3>
+        <p class="muted">
+          Đổi mật khẩu sẽ đăng xuất tài khoản trên các thiết bị. PIN khôi phục
+          được giữ nguyên.
+        </p>
+        <form id="passwordForm">
+          <label for="oldPassword">Mật khẩu hiện tại</label
+          ><input
+            id="oldPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+          /><label for="newPassword">Mật khẩu mới</label
+          ><input
+            id="newPassword"
+            type="password"
+            minlength="12"
+            maxlength="128"
+            autocomplete="new-password"
+            required
+          /><label for="newPasswordConfirm">Nhập lại mật khẩu mới</label
+          ><input
+            id="newPasswordConfirm"
+            type="password"
+            minlength="12"
+            maxlength="128"
+            autocomplete="new-password"
+            required
+          /><button type="submit">Đổi mật khẩu</button>
+        </form>
+      </section>
+      <section class="settings-block">
+        <h3>Thiết bị & phiên đăng nhập</h3>
+        <p class="muted">
+          Tên thiết bị lấy từ trình duyệt, chỉ có tính tham khảo.
+        </p>
+        <div id="sessionsList"></div>
+      </section>
+      <section class="settings-block">
+        <h3>PIN & khôi phục lịch sử</h3>
+        <p>
+          Thiết bị mới cần PIN hoặc mã khôi phục để mở lịch sử. Đổi PIN sẽ tạo
+          mã khôi phục mới.
+        </p>
+        <button id="changeRecoveryPin">Đổi PIN & mã khôi phục</button>
+        <form id="unlockForm" hidden>
+          <input id="backupPassword" type="password" /><button type="submit">
+            Mở lịch sử
+          </button>
+        </form>
+      </section>
+    </dialog>
+    <dialog id="accountDialog" aria-labelledby="accountTitle">
+      <div class="dialog-top">
+        <h2 id="accountTitle">Xác minh tài khoản</h2>
+        <button id="closeAccount" class="quiet" aria-label="Đóng">✕</button>
+      </div>
+      <p id="accountHelp"></p>
+      <form id="accountForm">
+        <label for="accountEmail">Email</label
+        ><input id="accountEmail" type="email" autocomplete="email" />
+        <div id="resetFields" hidden>
+          <label for="resetPassword">Mật khẩu mới</label
+          ><input
+            id="resetPassword"
+            type="password"
+            minlength="12"
+            maxlength="128"
+            autocomplete="new-password"
+          /><label for="resetConfirm">Nhập lại mật khẩu</label
+          ><input
+            id="resetConfirm"
+            type="password"
+            minlength="12"
+            maxlength="128"
+            autocomplete="new-password"
+          />
+        </div>
+        <button type="submit" class="primary">Tiếp tục</button>
+      </form>
+      <p id="accountStatus" role="status"></p>
+    </dialog>
+    <dialog
+      id="confirmDialog"
+      aria-labelledby="confirmTitle"
+      aria-describedby="confirmDescription"
+    >
+      <form method="dialog">
         <h2 id="confirmTitle"></h2>
         <p id="confirmDescription"></p>
         <div class="confirm-actions">
-            <button id="confirmNo" value="no" autofocus>No</button>
-            <button id="confirmYes" value="yes">Yes</button>
+          <button id="confirmNo" value="no" autofocus>No</button
+          ><button id="confirmYes" value="yes" class="primary">Yes</button>
         </div>
-    </form>
-</dialog>
-<script src="/js/encryption/keyManager.js"></script>
-<script src="/js/encryption/encryption.js"></script>
-<script src="/js/encryption/decryption.js"></script>
-<script src="/js/keyIntegration.js"></script>
-<script src="/js/app.js"></script>
-</body>
+      </form>
+    </dialog>
+    <dialog id="createGroupDialog" aria-labelledby="createGroupTitle">
+      <div class="dialog-top">
+        <h2 id="createGroupTitle">Nhóm mới</h2>
+        <button
+          type="button"
+          id="closeCreateGroup"
+          class="quiet"
+          aria-label="Đóng"
+        >
+          ✕
+        </button>
+      </div>
+      <p class="muted">
+        Tạo nhóm rồi mời bạn bè. Mỗi người cần chấp nhận để tham gia.
+      </p>
+      <form id="createGroupForm">
+        <label for="newGroupName">Tên nhóm</label
+        ><input id="newGroupName" maxlength="100" required /><label
+          for="newGroupDescription"
+          >Mô tả</label
+        ><textarea id="newGroupDescription" maxlength="300"></textarea
+        ><button type="submit" class="primary">Tạo nhóm</button>
+      </form>
+      <p id="createGroupStatus" role="status"></p>
+    </dialog>
+    <dialog id="groupSettingsDialog" aria-labelledby="groupSettingsTitle">
+      <div class="dialog-top">
+        <h2 id="groupSettingsTitle">Quản lý nhóm</h2>
+        <button
+          type="button"
+          id="closeGroupSettings"
+          class="quiet"
+          aria-label="Đóng"
+        >
+          ✕
+        </button>
+      </div>
+      <p id="groupSettingsStatus" role="status"></p>
+      <p class="muted">
+        Chặn riêng tư áp dụng cho chat 1–1 và lời mời. Trong nhóm chung, bạn vẫn
+        thấy tin của nhau; có thể rời nhóm hoặc nhờ quản trị viên xóa thành
+        viên.
+      </p>
+      <form id="groupMetadataForm">
+        <label for="editGroupName">Tên nhóm</label
+        ><input id="editGroupName" maxlength="100" required /><label
+          for="editGroupDescription"
+          >Mô tả</label
+        ><textarea id="editGroupDescription" maxlength="300"></textarea
+        ><button type="submit">Lưu tên & mô tả</button>
+      </form>
+      <form id="groupAvatarForm">
+        <label for="groupAvatarFile">Ảnh nhóm · tối đa 2 MB</label
+        ><input
+          id="groupAvatarFile"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          required
+        /><button type="submit">Cập nhật ảnh nhóm</button>
+      </form>
+      <h3>Thành viên</h3>
+      <div id="groupMembers"></div>
+      <form id="groupInviteForm">
+        <label for="groupInviteHandle">Tìm bạn để mời</label
+        ><input id="groupInviteHandle" minlength="3" required /><button
+          type="submit"
+        >
+          Tìm người mời
+        </button>
+      </form>
+      <div id="groupInviteResults"></div>
+      <p id="leaveGroupHint" class="muted" hidden>
+        Chuyển quyền chủ nhóm cho một thành viên khác trước khi rời nhóm.
+      </p>
+      <button id="leaveGroup" class="danger">Rời nhóm</button>
+    </dialog>
+    <dialog
+      id="recoveryDialog"
+      aria-labelledby="recoveryTitle"
+      class="recovery-dialog"
+    >
+      <div class="recovery-mark" aria-hidden="true">✳</div>
+      <h2 id="recoveryTitle">Bảo vệ lịch sử trò chuyện</h2>
+      <p id="recoveryDescription" class="muted"></p>
+      <form id="recoveryForm">
+        <div id="recoverySetup">
+          <div id="recoveryLegacy" hidden>
+            <p>
+              Nhập mật khẩu từng dùng để mở lịch sử trước khi thiết lập PIN.
+            </p>
+            <label for="recoveryLegacyPassword">Mật khẩu cũ</label
+            ><input
+              id="recoveryLegacyPassword"
+              type="password"
+              autocomplete="off"
+            />
+          </div>
+          <div id="recoveryPasswordField">
+            <label for="recoveryPassword">Mật khẩu hiện tại</label
+            ><input
+              id="recoveryPassword"
+              type="password"
+              autocomplete="current-password"
+            />
+          </div>
+          <label for="recoveryPin">Tạo PIN 8 chữ số</label
+          ><input
+            id="recoveryPin"
+            type="password"
+            inputmode="numeric"
+            pattern="[0-9]{8}"
+            minlength="8"
+            maxlength="8"
+            autocomplete="new-password"
+          />
+          <label for="recoveryPinConfirm">Nhập lại PIN</label
+          ><input
+            id="recoveryPinConfirm"
+            type="password"
+            inputmode="numeric"
+            pattern="[0-9]{8}"
+            minlength="8"
+            maxlength="8"
+            autocomplete="new-password"
+          />
+        </div>
+        <div id="recoveryUnlock" hidden>
+          <label id="recoveryValueLabel" for="recoveryValue">PIN 8 chữ số</label
+          ><input
+            id="recoveryValue"
+            type="password"
+            autocomplete="off"
+          /><button type="button" id="recoveryAlternative" class="link">
+            Dùng mã khôi phục
+          </button>
+        </div>
+        <div id="recoverySave" hidden>
+          <code id="recoveryCode"></code>
+          <div class="recovery-actions">
+            <button type="button" id="recoveryCopy">Sao chép mã</button
+            ><button type="button" id="recoveryDownload">Tải mã về</button>
+          </div>
+          <label class="check"
+            ><input id="recoverySaved" type="checkbox" />Tôi đã lưu mã khôi phục
+            ở nơi an toàn.</label
+          >
+        </div>
+        <p id="recoveryStatus" role="status"></p>
+        <p id="recoveryCountdown" role="status"></p>
+        <button id="recoverySubmit" class="primary" type="submit">
+          Tiếp tục
+        </button>
+      </form>
+      <button id="recoveryLogout" class="link">Đăng xuất</button>
+    </dialog>
+    <script src="/js/theme.js"></script>
+    <script src="/js/encryption/keyManager.js"></script>
+    <script src="/js/encryption/encryption.js"></script>
+    <script src="/js/encryption/decryption.js"></script>
+    <script src="/js/keyIntegration.js"></script>
+    <script src="/js/historyCache.js"></script>
+    <script src="/js/captcha.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/account.js"></script>
+    <script src="/js/vendor/secure-v2.js"></script>
+    <script src="/js/recovery-crypto.js"></script>
+    <script src="/js/recovery-ui.js"></script>
+    <script src="/js/thread-actions.js"></script>
+    <script src="/js/groups-files.js"></script>
+    <script src="/js/telegram.js"></script>
+  </body>
 </html>

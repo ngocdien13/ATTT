@@ -1,0 +1,47 @@
+Seruchat Telegram + Phase 6–8 — verification, 2026-10-29
+
+Environment: Linux, Node 24.22.1, real temporary MySQL 8,
+Chromium via Playwright 1.62.1, JDK 21 for legacy adapters.
+Mobile: 390px browser viewport; not a physical-device test.
+Test databases were isolated/random and removed after execution.
+
+API/crypto/integration: 76 tests, 76 pass, 0 fail, 0 skipped.
+Includes independent PIN/code recovery, durable escalation/restart,
+sealed recovery prepare state, missing-master startup refusal with vaults or
+only MFA/audit data, CSRF/IDOR, role gates, TOTP vectors/replay,
+password reauthentication, session revocation on suspension,
+workspace read markers with microsecond precision, private preferences,
+opaque saved-note ownership and tamper-evident audit validation.
+Turnstile verification tests mock the external provider; hostname/action,
+expiry/replay and fail-closed behavior are tested. No real production widget
+or Internet email/SMS provider was activated.
+
+Browser suites: PASS.
+PASS: signed direct/reaction/edit/reply/pin/recall; saved encrypted notes; per-user pin/archive/mute/unread persistence; TOTP-gated admin browser UI
+PASS: logout prevents pending decrypted notes repopulating UI and clears drafts
+PASS: legacy rows unchanged; browser recipient/self; Unsent draft is preserved; cached signed tampering rejected; fresh profile restore; Java compilation; Java v1 adapter ↔ web; profile + avatar UI; password change + independent PIN fresh-device history restore; registration + handle search UI; dark mode; 390px mobile; emoji + client search; no page errors.
+PASS: alpha PIN enrollment
+PASS: three independent accounts enrolled
+PASS: signed unauthorized group edits/pins ignored; owner pin/unpin synchronized
+PASS: ten consecutive Enter sends; receiver delivery; idle DOM stays stable; draft + scroll preserved
+PASS: group/direct drafts and rapid switching preserve the selected conversation
+PASS: fresh profile requires PIN; five failures + countdown + reload; independent code recovers history; trusted reload
+PASS: real 3-browser signed group/invite/accept; new-member old-history exclusion; group/direct binary files + real downloads + oversized/tampered binary rejection; safe PNG/JPEG/WebP previews + disguised SVG rejection; cached tamper rejection; pinned-key substitution blocked; signed rename + removal; former member old/new file authorization; fresh-device identity restore; mobile390px; no page errors.
+
+Java compatibility uses explicit development-only legacy v1 sending.
+The normal web composer sends signed v2; Java v1 does not decrypt v2.
+Original v1 browser crypto and migrations 001–005 remain unchanged.
+
+Other checks:
+- JS syntax checks and git diff whitespace checks passed.
+- Production npm audit: 0 known vulnerabilities reported on this run.
+  This is dependency-advisory checking, not an independent security audit.
+- Compose YAML parsed; only reverse proxy publishes ports, DB network is
+  internal, application root filesystem is read-only.
+- backup.sh passed bash syntax checking.
+- Backup encryption round-trip, tamper and wrong-key rejection passed.
+
+Not executed: Docker image build/Compose runtime, ACME HTTPS, EC2/AWS,
+Cloudflare production widget, full Docker/cloud backup+restore drill,
+load testing, independent cryptographic/penetration audit.
+No key transparency, ratchet/forward secrecy or native-client release.

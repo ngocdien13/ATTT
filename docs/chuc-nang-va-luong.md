@@ -1,3 +1,5 @@
+> Bản ghi/hướng dẫn baseline. Thay đổi phase1 và kết quả thực chạy hiện hành: [CHANGELOG](../CHANGELOG.md), [TESTING](../TESTING.md), [DATABASE](../DATABASE.md). Các tính năng nâng cấp khác chưa được triển khai.
+
 # Seruchat: chức năng từng file và luồng hoạt động
 
 Ứng dụng gồm trình duyệt, server Node.js và MySQL. Sender/Receiver Java là các client khác có thể kết nối cùng server. Server phục vụ client ở http://localhost:3000; không cần chạy một server riêng trong thư mục client.

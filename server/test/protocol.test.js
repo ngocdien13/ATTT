@@ -6,12 +6,10 @@ const crypto = require('node:crypto');
 const vm = require('node:vm');
 const {uuid, base64, publicKey, ApiError} = require('../src/utils/api');
 const clientPath = path.resolve(__dirname, '../../client/js/encryption');
-test('The original browser encryption files have not changed', () => {
-    const expected = {
-        'keyManager.js': '1e181815105f349ea18ad5117361c43ed75f67dda980ba26fb5878aeb72d2ea3',
-        'encryption.js': 'd98efd1d4e8b1dcae5f83a088afc888becb80113a220b6684333059852876c3a',
-        'decryption.js': 'f7209d6e56e7a59bdc20c6ce4c1b2973dcb50ce57882dc5e2976013e18cc4f16'
-    };
+test('Browser crypto bytes match the pinned GitHub baseline, not stale historical upload hashes', () => {
+    const manifest = require('../../docs/crypto-preservation.json');
+    assert.equal(manifest.reference_commit, '7f2894fcceb1b960e47613b561eac200b78cb58b');
+    const expected = manifest.browser_files;
     for (const [file, hash] of Object.entries(expected)) assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(clientPath, file))).digest('hex'), hash, file);
 });
 test('Reject malformed IDs, Base64, wrong IV length and non-X25519 keys', () => {
@@ -72,4 +70,10 @@ test('Key adapter preserves keys across reload/restore and never creates keys on
     stored = null;
     await assert.rejects(context.getOrCreateKeyPair('user', 'wrong-password'), /Cannot unlock/);
     assert.equal(stored, null); assert.equal(publishes, 1);
+    const wrongPair = await context.generateKeyPair();
+    const validBackup = backup;
+    backup = {...await context.encryptPrivateKey(wrongPair.privateKey, 'password')};
+    await assert.rejects(context.getOrCreateKeyPair('user', 'password'), /does not match/);
+    assert.equal(stored, null); assert.equal(publishes, 1);
+    backup = validBackup;
 });

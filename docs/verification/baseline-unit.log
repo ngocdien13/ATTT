@@ -1,0 +1,43 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> server@1.0.0 test
+> node --test test/*.test.js
+
+✔ Request tracing reports completed HTTP results without exposing credentials, bodies, IDs or query strings (69.748266ms)
+✔ Disabled tracing leaves HTTP responses unchanged and emits no logs (12.348431ms)
+﹣ HTTP APIs with real MySQL, sessions, races and blocking (0.847033ms) # SKIP
+✖ The original browser encryption files have not changed (2.35996ms)
+✔ Reject malformed IDs, Base64, wrong IV length and non-X25519 keys (13.032202ms)
+✔ Original browser encryption decrypts Vietnamese and rejects tampering (19.538174ms)
+✔ Key adapter preserves keys across reload/restore and never creates keys on missing password or server failure (288.189737ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 423.421049
+
+✖ failing tests:
+
+test at test/protocol.test.js:9:1
+✖ The original browser encryption files have not changed (2.35996ms)
+  AssertionError [ERR_ASSERTION]: keyManager.js
+  + actual - expected
+
+  + 'f5871e8cf3a802e7fa8fd71328b3b8698f30ff14c99496dbd576ee5e2c0009cc'
+  - '1e181815105f349ea18ad5117361c43ed75f67dda980ba26fb5878aeb72d2ea3'
+
+      at TestContext.<anonymous> (/workspace/scratch/1c22cc77c995/ATTT/server/test/protocol.test.js:15:65)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'f5871e8cf3a802e7fa8fd71328b3b8698f30ff14c99496dbd576ee5e2c0009cc',
+    expected: '1e181815105f349ea18ad5117361c43ed75f67dda980ba26fb5878aeb72d2ea3',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

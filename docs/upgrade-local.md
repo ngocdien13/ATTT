@@ -1,3 +1,5 @@
+> Bản ghi/hướng dẫn baseline. Thay đổi phase1 và kết quả thực chạy hiện hành: [CHANGELOG](../CHANGELOG.md), [TESTING](../TESTING.md), [DATABASE](../DATABASE.md). Các tính năng nâng cấp khác chưa được triển khai.
+
 # Cập nhật Seruchat đang chạy trên máy bạn
 
 Bản này thêm xóa bạn, bỏ chặn, hủy lời mời, gửi lại lời mời bị từ chối, xác nhận Yes / No, log API và quan sát database. Các file mã hóa, key local, thư viện và bản mã tin nhắn được giữ nguyên.

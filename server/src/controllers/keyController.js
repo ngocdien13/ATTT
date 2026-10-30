@@ -19,6 +19,8 @@ async function savePublicKey(req, res) {
         // Serializes the first publish too, including two devices on a fresh account.
         const [users] = await connection.query('SELECT id FROM users WHERE id = ? FOR UPDATE', [id]);
         if (!users.length) fail(401, 'User no longer exists');
+        const [[vault]] = await connection.query('SELECT user_id FROM recovery_vaults WHERE user_id=?', [id]);
+        if (vault && hasBackup) fail(409, 'Tài khoản này đã dùng PIN. Không thể lưu bản khôi phục bằng mật khẩu.');
         const [keys] = await connection.query('SELECT public_key FROM public_keys WHERE user_id = ?', [id]);
         if (keys.length && keys[0].public_key !== key) fail(409, 'This account already has a different key. Restore the existing private key instead of replacing it.');
         if (!keys.length) await connection.query(`INSERT INTO public_keys
@@ -35,6 +37,8 @@ async function getPublicKey(req, res) {
     res.json({publicKey: keys[0].public_key, algorithm: keys[0].algorithm});
 }
 async function getMyPrivateKey(req, res) {
+    const [[vault]] = await db.promise().query('SELECT user_id FROM recovery_vaults WHERE user_id=?', [req.session.userId]);
+    if (vault) fail(403, 'Nhập PIN hoặc mã khôi phục để mở lịch sử.');
     const [keys] = await db.promise().query('SELECT encrypted_private_key, encryption_salt, encryption_iv FROM public_keys WHERE user_id = ?', [req.session.userId]);
     if (!keys.length || !keys[0].encrypted_private_key) fail(404, 'Encrypted private key not available');
     res.json({encryptedPrivateKey: keys[0].encrypted_private_key, salt: keys[0].encryption_salt, iv: keys[0].encryption_iv});

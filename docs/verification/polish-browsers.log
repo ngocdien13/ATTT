@@ -1,0 +1,13 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> seruchat-e2e-tests@1.0.0 test
+> node legacy.cjs && node groups-files.cjs
+
+PASS: legacy rows unchanged; browser recipient/self; Unsent draft is preserved; cached GCM tampering rejected; fresh profile restore; Java compilation; Java ↔ web; profile + avatar UI; password change + independent PIN fresh-device history restore; registration + handle search UI; dark mode; 390px mobile; emoji + client search; no page errors.
+PASS: alpha PIN enrollment
+PASS: three independent accounts enrolled
+API error: ETIMEDOUT
+API error: ETIMEDOUT
+PASS: ten consecutive Enter sends; receiver delivery; idle DOM stays stable; draft + scroll preserved
+PASS: fresh profile requires PIN; five failures + countdown + reload; independent code recovers history; trusted reload
+PASS: real 3-browser signed group/invite/accept; new-member old-history exclusion; group/direct binary files + real downloads + oversized/tampered binary rejection; safe PNG/JPEG/WebP previews + disguised SVG rejection; cached tamper rejection; pinned-key substitution blocked; signed rename + removal; former member old/new file authorization; fresh-device identity restore; mobile390px; no page errors.

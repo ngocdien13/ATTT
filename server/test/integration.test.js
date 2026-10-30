@@ -1,3 +1,4 @@
+process.env.ALLOW_LEGACY_SEND="true";
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -22,6 +23,7 @@ test('HTTP APIs with real MySQL, sessions, races and blocking', {skip: process.e
         function client() {
             let cookie = '';
             return async (route, body, headers = {}) => {
+                if(route === '/api/auth/register' && body) body={handle:'test_'+crypto.randomBytes(5).toString('hex'),dateOfBirth:'2000-01-01',acceptTerms:true,...body};
                 const response = await fetch(url + route, {method: body === undefined ? 'GET' : 'POST', headers: {...(cookie ? {Cookie: cookie} : {}), ...headers,
                     ...(body === undefined ? {} : {'Content-Type': 'application/json'})}, body: body === undefined ? undefined : JSON.stringify(body)});
                 const set = response.headers.get('set-cookie'); if (set) cookie = set.split(';')[0];
@@ -31,6 +33,13 @@ test('HTTP APIs with real MySQL, sessions, races and blocking', {skip: process.e
         const a = client(), b = client(), e = client(), anon = client();
         let alice, bob, eve, f, conversation;
         const password = 'demo-password';
+        await t.test('Readiness rejects pending migrations and becomes ready after explicit upgrade', async () => {
+            assert.equal((await anon('/health/live')).data.status,'alive');
+            assert.equal((await anon('/health/ready')).status,503);
+            const connection=await db.promise().getConnection();
+            try { await require('../src/migrations/runner').up(connection); } finally { connection.release(); }
+            assert.equal((await anon('/health/ready')).status,200);
+        });
         await t.test('Register, duplicate email, login sessions and validation', async () => {
             alice = (await a('/api/auth/register', {username: 'Alice', email: 'alice@example.test', password})).data.user;
             bob = (await b('/api/auth/register', {username: 'Bob', email: 'bob@example.test', password})).data.user;
@@ -147,6 +156,17 @@ test('HTTP APIs with real MySQL, sessions, races and blocking', {skip: process.e
             assert.equal((await e('/api/friendships/requests')).data.requests.length, 0);
             assert.equal((await d('/api/friendships/unblock', {targetUserId:crypto.randomUUID()})).status, 404);
             assert.equal((await d('/api/friendships/remove', {targetUserId:crypto.randomUUID()})).status, 404);
+        });
+        await t.test('Bounded history pages retain microsecond order, reject malformed cursors and enforce membership',async()=>{
+            for(let i=0;i<55;i++) await db.promise().query(`INSERT INTO messages(id,conversation_id,sender_id,ciphertext,nonce,sender_public_key,self_ciphertext,self_nonce,self_public_key,created_at)
+                SELECT ?,conversation_id,sender_id,ciphertext,nonce,sender_public_key,self_ciphertext,self_nonce,self_public_key,? FROM messages WHERE conversation_id=? LIMIT 1`,
+                [crypto.randomUUID(),'2030-01-01 12:00:00.'+String(i).padStart(6,'0'),conversation]);
+            const first=await a('/api/history/'+conversation);assert.equal(first.status,200);assert.equal(first.data.messages.length,50);assert.ok(first.data.next);
+            const second=await a('/api/history/'+conversation+'?before='+first.data.next);assert.equal(second.data.messages.length,8);assert.equal(second.data.next,null);
+            assert.equal(new Set([...first.data.messages,...second.data.messages].map(m=>m.id)).size,58);
+            const all=(await a('/api/messages/'+conversation)).data;assert.deepEqual([...second.data.messages,...first.data.messages].map(m=>m.id),all.map(m=>m.id));
+            assert.equal((await e('/api/history/'+conversation)).status,403);
+            assert.equal((await a('/api/history/'+conversation+'?before=bad')).status,400);
         });
         await t.test('Spam returns 429 and logout invalidates the session', async () => {
             let result;

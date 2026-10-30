@@ -3,3 +3,17 @@ server/.env
 encryption/*.class
 encryption/keys/
 *.log
+!docs/verification/*.log
+**/.env
+**/.env.*
+!**/.env.example
+.data/
+backups/
+artifacts/
+**/node_modules/
+**/*.class
+
+deploy/secrets/
+deploy/app.env
+!deploy/app.env.example
+**/*.scbackup

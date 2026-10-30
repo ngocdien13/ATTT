@@ -1,0 +1,14 @@
+{
+  "name": "seruchat-e2e-tests",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node legacy.cjs && node groups-files.cjs && node reference-ui.cjs",
+    "test:legacy": "node legacy.cjs",
+    "test:groups": "node groups-files.cjs",
+    "test:ui": "node reference-ui.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

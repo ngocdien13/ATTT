@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+.data
+backups
+**/*.log
+**/e2e
+**/test
+*.zip
+deploy/secrets
+deploy/app.env
+**/*.scbackup

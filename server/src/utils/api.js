@@ -47,7 +47,7 @@ function errorHandler(error, req, res, next) {
         ER_LOCK_WAIT_TIMEOUT: [409, 'Concurrent change; please retry']
     };
     if (mapping[error.code]) { const [status, message] = mapping[error.code]; return res.status(status).json({message}); }
-    console.error('API error:', error.code || error.name, error.message);
+    console.error('API error:', error.code || error.name);
     res.status(500).json({message: 'Internal server error'});
 }
 module.exports = {ApiError, fail, uuid, text, base64, publicKey, pair, endpoint, errorHandler};

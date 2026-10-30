@@ -14,6 +14,7 @@ function messageFields(body) {
     };
 }
 async function sendMessage(req, res) {
+    if(process.env.ALLOW_LEGACY_SEND!=="true")fail(410,"Cần dùng ứng dụng mới để gửi tin có chữ ký.");
     const senderId = req.session.userId, data = messageFields(req.body);
     const requested = req.body.conversationId ? uuid(req.body.conversationId, 'Conversation ID') : null;
     const recipient = requested ? null : uuid(req.body.to, 'Recipient user ID');
@@ -58,4 +59,21 @@ async function getJavaInbox(req, res) {
     if (!messages.length) return res.status(204).end();
     res.json(messages);
 }
-module.exports = {sendMessage, getMessages, getJavaInbox, messageFields};
+// Bounded cursor API for the modern web client. Legacy endpoints retain their array contracts.
+async function getHistoryPage(req,res) {
+    const id=uuid(req.params.conversationId,'Conversation ID');
+    await conversationPair(db.promise(),id,req.session.userId);
+    let before=null;
+    if(req.query.before!==undefined){
+        try {if(typeof req.query.before!=='string'||req.query.before.length>256)throw new Error();before=JSON.parse(Buffer.from(req.query.before,'base64url').toString('utf8'));
+            uuid(before.id);if(typeof before.time!=='string'||!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}$/.test(before.time))throw new Error();}
+        catch {fail(400,'History cursor is invalid');}
+    }
+    const [rows]=await db.promise().query(`SELECT *,DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s.%f') AS cursor_time FROM messages
+        WHERE conversation_id=? ${before?'AND (created_at < ? OR (created_at = ? AND id < ?))':''}
+        ORDER BY created_at DESC,id DESC LIMIT 51`,[id,...(before?[before.time,before.time,before.id]:[])]);
+    const hasMore=rows.length>50,selected=rows.slice(0,50),last=selected.at(-1);
+    const next=hasMore&&last?Buffer.from(JSON.stringify({time:last.cursor_time,id:last.id})).toString('base64url'):null;
+    res.json({messages:selected.reverse().map(({cursor_time,...row})=>({...row,created_at:cursor_time.replace(' ','T')+'Z'})),next});
+}
+module.exports = {getHistoryPage,sendMessage, getMessages, getJavaInbox, messageFields};

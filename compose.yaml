@@ -1,0 +1,80 @@
+name: seruchat
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: seruchat
+      MYSQL_USER: seruchat
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets: [db_password, db_root_password]
+    volumes: [mysql_data:/var/lib/mysql]
+    networks: [database]
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1.0
+    healthcheck:
+      test:
+        [
+          CMD-SHELL,
+          'MYSQL_PWD="$$(cat /run/secrets/db_password)" mysqladmin ping -h 127.0.0.1 -u seruchat --silent',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    init: true
+    env_file: deploy/app.env
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: seruchat
+      DB_NAME: seruchat
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      SESSION_SECRET_FILE: /run/secrets/session_secret
+      RECOVERY_MASTER_KEY_FILE: /run/secrets/recovery_master_key
+      TRUST_PROXY: "uniquelocal,linklocal"
+    secrets: [db_password, session_secret, recovery_master_key]
+    depends_on:
+      db: { condition: service_healthy }
+    volumes: [ciphertext:/app/.data/encrypted-files]
+    networks: [edge, database]
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    tmpfs: [/tmp:size=64m, mode=1777]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 768m
+    cpus: 1.0
+  proxy:
+    image: caddy:2
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in root .env}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in root .env}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app: { condition: service_healthy }
+    networks: [edge]
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+networks:
+  edge: {}
+  database: { internal: true }
+volumes:
+  mysql_data: {}
+  ciphertext: {}
+  caddy_data: {}
+  caddy_config: {}
+secrets:
+  db_password: { file: ./deploy/secrets/db_password }
+  db_root_password: { file: ./deploy/secrets/db_root_password }
+  session_secret: { file: ./deploy/secrets/session_secret }
+  recovery_master_key: { file: ./deploy/secrets/recovery_master_key }

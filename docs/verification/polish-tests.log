@@ -1,0 +1,84 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> server@1.0.0 test
+> node --test test/*.test.js
+
+✔ Email, Gmail aliases, Vietnamese phones, real birthdays and password rules (13.902787ms)
+▶ Account lifecycle over HTTP, real MySQL and local SMTP
+  ✔ Atomic registration, required consent, duplicates and profile privacy (1208.671832ms)
+  ✔ Real SMTP email challenge, wrong token, single use and verification gate (734.481373ms)
+  ✔ Profile changes clear phone verification, immutable identity, DOB validation and safe avatar (432.621553ms)
+  ✔ SMS OTP expiry, attempts and phone ownership are checked in database (373.407501ms)
+  ✔ Session listing and IDOR-safe revocation invalidates only the chosen device (59.128256ms)
+  ✔ Changing password rewraps the same X25519 identity and revokes sessions atomically (1565.681933ms)
+  ✔ Reset SMTP token preserves the old encrypted backup, rejects replay and revokes login (627.353054ms)
+  ✔ Origin, simple form CSRF, durable throttle and generic reset response (59.553928ms)
+✔ Account lifecycle over HTTP, real MySQL and local SMTP (7713.881523ms)
+✔ Twilio transport sends a real API-shaped request and fails closed on provider errors (2.069629ms)
+✔ One-command bootstrap: empty database, generated secrets, repeat start and preserved data (3488.570033ms)
+✔ Request tracing reports completed HTTP results without exposing credentials, bodies, IDs or query strings (234.692618ms)
+✔ Disabled tracing leaves HTTP responses unchanged and emits no logs (43.261711ms)
+▶ Groups and binary E2EE files over real HTTP/MySQL/storage
+  ✔ Identity immutability, ownership, authenticated CSRF and signed group genesis (259.004797ms)
+  ✔ Signed invitations, accept/reject/ownership, no implicit old-history access (694.90799ms)
+  ✔ Roles, signed metadata/avatar, transfer rules and former members cannot send new messages (668.176287ms)
+  ✔ Binary upload stays private until publish, validates hashes and wraps, then every recipient decrypts (392.638049ms)
+  ✔ A newly accepted member cannot fetch any earlier message or file (327.497268ms)
+  ✔ Removing a member invalidates stale envelopes/reservations; old wrapped history remains readable (466.859319ms)
+  ✔ Direct chat file E2EE preserves legacy tables and rejects outsider reads (147.751939ms)
+  ✔ 10 MB boundary, quota reservation races, owner-only cancellation and traversal rejection (652.20073ms)
+  ✔ Maintenance releases only expired orphans, deletes stale temp files and preserves attached ciphertext (70.85367ms)
+  ✔ Membership changes serialize with sending; owner transfers then leaves; invalid cursors reject (153.594605ms)
+✔ Groups and binary E2EE files over real HTTP/MySQL/storage (8140.181749ms)
+✔ An edited cached ciphertext is decrypted again and rejected by real GCM; restored row works (68.695063ms)
+✔ Logout/conversation clear prevents in-flight reads repopulating the cache; cache is bounded (0.813659ms)
+▶ HTTP APIs with real MySQL, sessions, races and blocking
+  ✔ Readiness rejects pending migrations and becomes ready after explicit upgrade (1597.7746ms)
+  ✔ Register, duplicate email, login sessions and validation (1633.429477ms)
+  ✔ Friend request races, self/nonexistent users and recipient authorization (148.609266ms)
+  ✔ Conversation creation is atomic and unique under parallel requests (76.886968ms)
+  ✔ Key ownership, Java publication, backup and replacement refusal (95.819841ms)
+  ✔ Member-only send/read, both HTTP contracts and ordered history (60.577658ms)
+  ✔ Block stops messages, new chats and invitations in both directions (62.945876ms)
+  ✔ Only blocker can unblock; accepted friendship and history resume; remove preserves history (77.090068ms)
+  ✔ Sent invitations can be cancelled; rejected invitations can be resent; chat is reused (169.58411ms)
+  ✔ Unblock non-friend or pending request never grants accepted status (551.010135ms)
+  ✔ Bounded history pages retain microsecond order, reject malformed cursors and enforce membership (407.647632ms)
+  ✔ Spam returns 429 and logout invalidates the session (225.102749ms)
+✔ HTTP APIs with real MySQL, sessions, races and blocking (6226.207285ms)
+✔ Migration loader rejects ambiguous versions and unexpected files (7.402614ms)
+▶ Real MySQL migrations preserve legacy identity/messages, fail closed, and recover explicitly
+  ✔ status is read-only; check rejects pending migrations (13.489011ms)
+  ✔ concurrent runs serialize; repeat up is a no-op, legacy bytes stay unchanged (1492.152801ms)
+  ✔ modified/missing migration files are rejected (24.856334ms)
+  ✔ partial DDL is marked failed; retry needs exact checksum and explicit resume (130.193095ms)
+✔ Real MySQL migrations preserve legacy identity/messages, fail closed, and recover explicitly (2795.146958ms)
+✔ Browser crypto bytes match the pinned GitHub baseline, not stale historical upload hashes (15.663975ms)
+✔ Reject malformed IDs, Base64, wrong IV length and non-X25519 keys (95.703695ms)
+✔ Original browser encryption decrypts Vietnamese and rejects tampering (46.331178ms)
+✔ Key adapter preserves keys across reload/restore and never creates keys on missing password or server failure (944.976113ms)
+✔ Recovery: separate encryption/auth material, PIN+gate, recovery code, AAD and tamper protection (762.701363ms)
+▶ Recovery over HTTP/MySQL: ownership, migration, account lockout, recovery alternative, rotation and persistence
+  ✔ setup requires the actual private key, not only account password (538.057175ms)
+  ✔ password-only backup cannot be restored or reintroduced after enrollment (55.211671ms)
+  ✔ startup refuses to regenerate a missing master key when vaults already exist (32.811484ms)
+  ✔ five concurrent wrong attempts count atomically; new sessions cannot bypass waiting (1641.587125ms)
+  ✔ recovery code still works during PIN lockout; PIN wait remains enforced (41.454751ms)
+  ✔ escalation 1min/5min/15min/1h/6h and recovery across server restart (1939.174012ms)
+  ✔ rotation preserves identity, rejects old version and invalidates old code (766.810208ms)
+  ✔ password changes do not create a password-only recovery copy (232.898596ms)
+✔ Recovery over HTTP/MySQL: ownership, migration, account lockout, recovery alternative, rotation and persistence (9650.042206ms)
+✔ Key Wrap 3 recipients: one ciphertext, every recipient including sender, wrong key rejected (205.457507ms)
+✔ Key Wrap 10 recipients: one ciphertext, every recipient including sender, wrong key rejected (280.988269ms)
+✔ Key Wrap 20 recipients: one ciphertext, every recipient including sender, wrong key rejected (910.256174ms)
+✔ Signed metadata, wraps, sender, cross-room substitution, unknown versions and identity backups fail closed (83.873644ms)
+✔ Roster chain validates invite acceptance, rejects unauthorized adds/escalation/forks and preserves removal boundaries (68.416463ms)
+✔ Binary file AEAD, encrypted metadata, ciphertext hash, wrong room and modified wrap (19.799795ms)
+ℹ tests 66
+ℹ suites 0
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11256.911652

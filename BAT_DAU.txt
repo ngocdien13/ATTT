@@ -1,0 +1,13 @@
+SERUCHAT — BẢN UI + PIN
+
+1. Dừng server cũ bằng Ctrl+C.
+2. Giải nén bản này vào thư mục mới. Nếu đã có dữ liệu, chép server/.env và thư mục .data từ ATTT cũ vào đúng vị trí trong ATTT mới. Giữ nguyên database MySQL.
+3. Cần Node.js 24 và MySQL 8 đang chạy.
+4. Mở START.cmd hoặc chạy node start.js tại thư mục ATTT.
+5. Lần đầu chưa có cấu hình: nhập thông tin MySQL trên máy bạn. Chương trình tự tạo/cập nhật một database, mặc định seruchat.
+6. Mở http://localhost:3000. Không cần import SQL hoặc chạy migration bằng tay.
+7. Đăng nhập lần đầu ở bản này: thiết lập PIN 8 số, lưu mã khôi phục, rồi vào chat. Trình duyệt mới cần PIN hoặc mã; trình duyệt đã có khóa được coi là thiết bị tin cậy.
+
+Giữ server/.env (đặc biệt RECOVERY_MASTER_KEY), database và .data qua các lần nâng cấp. Không gửi .env/mật khẩu/PIN/mã khôi phục vào chat hay GitHub.
+
+README.md là hướng dẫn hiện hành. Bản này chưa có Admin hoặc triển khai AWS.

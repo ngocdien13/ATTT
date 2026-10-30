@@ -1,0 +1,41 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> server@1.0.0 test
+> node --test test/*.test.js
+
+✔ Request tracing reports completed HTTP results without exposing credentials, bodies, IDs or query strings (82.385027ms)
+✔ Disabled tracing leaves HTTP responses unchanged and emits no logs (10.65508ms)
+✔ An edited cached ciphertext is decrypted again and rejected by real GCM; restored row works (16.286527ms)
+✔ Logout/conversation clear prevents in-flight reads repopulating the cache; cache is bounded (0.531638ms)
+▶ HTTP APIs with real MySQL, sessions, races and blocking
+  ✔ Readiness rejects pending migrations and becomes ready after explicit upgrade (88.085649ms)
+  ✔ Register, duplicate email, login sessions and validation (497.425749ms)
+  ✔ Friend request races, self/nonexistent users and recipient authorization (49.142945ms)
+  ✔ Conversation creation is atomic and unique under parallel requests (31.204444ms)
+  ✔ Key ownership, Java publication, backup and replacement refusal (29.677935ms)
+  ✔ Member-only send/read, both HTTP contracts and ordered history (24.872859ms)
+  ✔ Block stops messages, new chats and invitations in both directions (36.963079ms)
+  ✔ Only blocker can unblock; accepted friendship and history resume; remove preserves history (56.852062ms)
+  ✔ Sent invitations can be cancelled; rejected invitations can be resent; chat is reused (59.085995ms)
+  ✔ Unblock non-friend or pending request never grants accepted status (177.30148ms)
+  ✔ Spam returns 429 and logout invalidates the session (59.8892ms)
+✔ HTTP APIs with real MySQL, sessions, races and blocking (1498.46922ms)
+✔ Migration loader rejects ambiguous versions and unexpected files (2.771921ms)
+▶ Real MySQL migrations preserve legacy identity/messages, fail closed, and recover explicitly
+  ✔ status is read-only; check rejects pending migrations (4.591318ms)
+  ✔ concurrent runs serialize; repeat up is a no-op, legacy bytes stay unchanged (82.744343ms)
+  ✔ modified/missing migration files are rejected (10.323108ms)
+  ✔ partial DDL is marked failed; retry needs exact checksum and explicit resume (60.323646ms)
+✔ Real MySQL migrations preserve legacy identity/messages, fail closed, and recover explicitly (443.960269ms)
+✔ Browser crypto bytes match the pinned GitHub baseline, not stale historical upload hashes (2.08996ms)
+✔ Reject malformed IDs, Base64, wrong IV length and non-X25519 keys (11.930742ms)
+✔ Original browser encryption decrypts Vietnamese and rejects tampering (24.800318ms)
+✔ Key adapter preserves keys across reload/restore and never creates keys on missing password or server failure (582.702432ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1598.418943

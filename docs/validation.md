@@ -1,3 +1,5 @@
+> Bản ghi/hướng dẫn baseline. Thay đổi phase1 và kết quả thực chạy hiện hành: [CHANGELOG](../CHANGELOG.md), [TESTING](../TESTING.md), [DATABASE](../DATABASE.md). Các tính năng nâng cấp khác chưa được triển khai.
+
 # Kiểm chứng bản ghép Seruchat
 
 Thực hiện ngày 06/10/2026 trên môi trường kiểm thử tách biệt, không kết nối database của người dùng.
